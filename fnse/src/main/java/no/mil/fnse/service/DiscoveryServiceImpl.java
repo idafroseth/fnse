@@ -3,6 +3,8 @@ package no.mil.fnse.service;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,40 +15,56 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.mil.fnse.model.Controller;
 import no.mil.fnse.model.Peer;
+import no.mil.fnse.repository.HibernateControllerDAO;
 import no.mil.fnse.configuration.DiscoveryConfiguration;
 
-@EnableScheduling
 @Service
 public class DiscoveryServiceImpl implements DiscoveryService {
+	static Logger logger = Logger.getLogger(DiscoveryServiceImpl.class);
+	
+	@Autowired
+	HibernateControllerDAO hibernateControllerDAO;
+	
 	final int HELLO_INTERVAL = 30;
-	boolean listenToHelloStarted = false;
+	boolean isListening = false;
+    byte[] buf = new byte[256];
+//    int listenerThreads=0;
+    
+    
 
 	/**
 	 * Sends a HELLO message every HELLO_INTERVAL
 	 */
-	@Scheduled(initialDelay=5*1000,fixedRate=HELLO_INTERVAL*1000)
+	@Scheduled(initialDelay=5*1000,fixedRate=30000)
 	public void sendHello() {
         try {
-			DiscoveryConfiguration.HELLO_SOCKET.send(DiscoveryConfiguration.HELLO_PACKET);
-		} catch (IOException e) {
-			e.printStackTrace();
+			DiscoveryConfiguration.SERVER_SOCKET.send(DiscoveryConfiguration.HELLO_PACKET);
+			logger.info("Sending HELLO");
+		} catch (IOException re) {
+			logger.error("Attached failed" + re);
 		}		
 	}
 
-	@Scheduled(initialDelay=6*1000, fixedRate = 3600000)
+	/**
+	 * DET ER ET PROBLEM AT DENNE STOPPER OPP ALLE TRÅDER NÅR DEN KJØRER 
+	 * Vi trenger en pool med tråder som har en pool-size attribute
+	 * WE NEED TO HAVE A SEPARATE SOCKET FOR THIS. WE ALSO NEED TO REGULARY SEND IGMP JOIN MESSAGES...
+	 */
+	@Scheduled(initialDelay=1*1000, fixedDelay = 3*1000)
 	public void listenHello() {
-		if(!listenToHelloStarted){
-	        byte[] buf = new byte[256];
+		logger.info("Setting up listener port");
+		if(!isListening){
+
             while (true) {
                 // Receive the information and print it.
                 DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                 try {
-					DiscoveryConfiguration.HELLO_SOCKET.receive(msgPacket);
+					DiscoveryConfiguration.CLIENT_SOCKET.receive(msgPacket);
 	                String msg = new String(buf, 0, buf.length);
 	                ObjectMapper mapper = new ObjectMapper();
 	                Controller ctrl;
 				
-						ctrl = mapper.readValue(msg, Controller.class);
+					ctrl = mapper.readValue(msg, Controller.class);
 			
 	                Peer neighbor = new Peer();
 	                neighbor.setRemoteInterfaceIp( msgPacket.getAddress());
@@ -63,22 +81,16 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 	//                	System.out.print("Neew peer: ");
 	//                	
 	//                }
-	                System.out.println(""+ctrl.getEntityId() + ctrl.getIpAddress() + neighbor.getRemoteInterfaceIp() );
-	                listenToHelloStarted = true;
-				} catch (JsonParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (JsonMappingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+	                logger.info("Discovered:"+ctrl.getEntityId() + ctrl.getIpAddress() + neighbor.getRemoteInterfaceIp() );
+//	                listenerThreads--;
+				} catch (JsonParseException re) {
+					logger.error("Attached failed" + re);
+				} catch (JsonMappingException re) {
+					logger.error("Attached failed" + re);
+				} catch (IOException re) {
+					logger.error("Attached failed" + re);
 				}
             }
-            
-			
-			
 		}
 		
 	}

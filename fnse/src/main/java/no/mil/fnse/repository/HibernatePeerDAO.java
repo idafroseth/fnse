@@ -2,8 +2,11 @@ package no.mil.fnse.repository;
 
 import java.net.InetAddress;
 import java.util.Collection;
-//import org.apache.log4j.Logger;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -15,7 +18,7 @@ import no.mil.fnse.model.Peer;
 @Component("hibernatePeerDAO")
 public class HibernatePeerDAO implements PeerDAO{
 	
-//	static Logger logger = Logger.getLogger(HibernatePeerDAO.class);
+	static Logger logger = Logger.getLogger(HibernatePeerDAO.class);
 	
 	@Autowired
 	public SessionFactory sessionFactory;
@@ -28,8 +31,18 @@ public class HibernatePeerDAO implements PeerDAO{
 	}
 	
 	public int savePeer(Peer peer) {
-		// TODO Auto-generated method stub
-		return 0;
+		try{
+			if(getPeerByIp(peer.getRemoteInterfaceIp(),peer.getLocalInterfaceIp())==null){
+				int id = (Integer) sessionFactory.getCurrentSession().save(peer);
+				logger.info("New peer added: peer(" + peer.getLocalInterfaceIp()+", " + peer.getRemoteInterfaceIp()+")");
+				return id;
+			}else{
+				return -1;
+			}
+		}catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return -1;
+		}
 	}
 
 	public Peer getPeer(int id) {
@@ -38,33 +51,66 @@ public class HibernatePeerDAO implements PeerDAO{
 	}
 
 	public Peer getPeerByIp(InetAddress local, InetAddress remote) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
+			criteria.add(Restrictions.eq("remoteInterfaceIp", remote));
+			criteria.add(Restrictions.eq("localInterfaceIp", local));
+			return (Peer) criteria.uniqueResult();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Peer> getAllPeers() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return sessionFactory.getCurrentSession().createQuery("FROM Peer order by id").list();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
 	public Collection<Peer> getAllPeersWithLocalIp(InetAddress localIp) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
+			criteria.add(Restrictions.eq("localInterfaceIp", localIp));
+			return criteria.list();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
 	public Collection<Peer> getAllPeersWithRemoteIp(InetAddress remoteIp) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
+			criteria.add(Restrictions.eq("remoteInterfaceIp", remoteIp));
+			return criteria.list();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
 	public Collection<Peer> getAllPeersWithController(Controller controller) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
+			criteria.add(Restrictions.eq("controller", controller));
+			return criteria.list();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
 	public void delPeer(Peer peer) {
-		// TODO Auto-generated method stub
-		
+		try {
+			sessionFactory.getCurrentSession().delete(peer);
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+		}
 	}
 	
 

@@ -68,7 +68,7 @@ public class Peer implements Serializable{
 		this.localInterfaceIp = localInterfaceAddress;
 	}
 	
-	@Column(name = "PEER_LOCAL_IP", unique = false, nullable = false)
+	@Column(name = "PEER_REMOTE_IP", nullable = false)
 	@Id
 	public InetAddress getRemoteInterfaceIp() {
 		return remoteInterfaceIp;

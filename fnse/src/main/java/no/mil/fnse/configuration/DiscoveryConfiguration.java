@@ -23,7 +23,8 @@ public class DiscoveryConfiguration {
 
 	public static  DiscoveryConfig DISCOVERY_CONFIG = new DiscoveryConfig();
 	public static String HELLO_MSG;
-	public static MulticastSocket HELLO_SOCKET;
+	public static MulticastSocket SERVER_SOCKET;
+	public static MulticastSocket CLIENT_SOCKET;
 	public static DatagramPacket HELLO_PACKET;
 	
 	private final int TTL = 10;
@@ -40,12 +41,19 @@ public class DiscoveryConfiguration {
 		if(!hasRun){
 			ObjectMapper mapper = new ObjectMapper();
 			try {
-				///src/main/resources/
+				
 				DISCOVERY_CONFIG = mapper.readValue(new File(System.getProperty("user.dir") +"/config.json"), DiscoveryConfig.class);
+				//Generate hello message from config
 				HELLO_MSG = mapper.writeValueAsString(DISCOVERY_CONFIG.getNATIONAL_CONTROLLER());
-				HELLO_SOCKET = new MulticastSocket(DISCOVERY_CONFIG.getPORT());
-				HELLO_SOCKET.setTimeToLive(TTL);
-				HELLO_SOCKET.joinGroup(DISCOVERY_CONFIG.getMULTICAST_GROUP());
+				//Setup a socket to listen and send packages to/from
+				//The server sender port in the HELLO_PACKET should be the same as the listener
+				CLIENT_SOCKET = new MulticastSocket(DISCOVERY_CONFIG.getPORT());
+				SERVER_SOCKET = new MulticastSocket(0);
+				SERVER_SOCKET.setTimeToLive(TTL);
+				
+				//Join group is only nessecary for the listener. Should be sent regulary..
+				CLIENT_SOCKET.joinGroup(DISCOVERY_CONFIG.getMULTICAST_GROUP());
+				
 				HELLO_PACKET = new DatagramPacket(HELLO_MSG.getBytes(), HELLO_MSG.getBytes().length, DISCOVERY_CONFIG.getMULTICAST_GROUP(), DISCOVERY_CONFIG.getPORT());
 			       
 			}  catch (IOException e) {

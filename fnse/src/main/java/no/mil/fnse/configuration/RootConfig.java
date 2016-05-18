@@ -4,6 +4,8 @@ package no.mil.fnse.configuration;
 
 import java.beans.PropertyVetoException;
 import java.util.Properties;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -13,6 +15,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -25,7 +30,8 @@ import org.springframework.context.annotation.Configuration;
 //beans are typically the middle-tier and data-tier components that drive the back end of the application
 @Configuration
 @ComponentScan(basePackages={"no.mil.fnse"})
-public class RootConfig {
+@EnableScheduling
+public  class RootConfig  implements SchedulingConfigurer{
 	static Logger logger = Logger.getLogger(RootConfig.class);
 	@Bean
 	public LocalSessionFactoryBean sessionFactory(ComboPooledDataSource dataSource) {
@@ -79,4 +85,13 @@ public class RootConfig {
 		};
 	}
 
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+		taskRegistrar.setScheduler(taskExecutor());
+	}
+
+    @Bean(destroyMethod="shutdown")
+    public Executor taskExecutor() {
+        return Executors.newScheduledThreadPool(10);
+    }
 }
