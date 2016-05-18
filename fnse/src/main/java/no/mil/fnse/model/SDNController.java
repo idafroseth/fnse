@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.List;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,15 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name="controller")
-public class Controller {
-	
-	@JsonIgnore
-	int id;
+public class SDNController {
 
 	@JsonProperty("ip")
 	InetAddress ipAddress;
@@ -35,23 +35,13 @@ public class Controller {
 	@JsonIgnore
 	List<Peer> peers;
 
-	public Controller(){
+	public SDNController(){
 		
 	}
 	
 	@Id
-	@GeneratedValue
-	@Column(name = "CONTROLLER_ID", unique = true, nullable = false)
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-	
 	@Basic(optional = false)
-	@Column(name = "CONTROLLER_IP")
+	@Column(name = "CONTROLLER_IP", unique = true, nullable = false)
 	public InetAddress getIpAddress() {
 		return ipAddress;
 	}
@@ -75,7 +65,7 @@ public class Controller {
 		this.helloInterval = helloInterval;
 	}
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "controller")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "controller")
 	public List<Peer> getPeers() {
 		return peers;
 	}

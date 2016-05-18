@@ -2,9 +2,7 @@ package no.mil.fnse.model;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.util.Date;
-
-import javax.persistence.Basic;
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,11 +27,11 @@ public class Peer implements Serializable{
 	
 	private InetAddress remoteInterfaceIp;
 	
-	private Date deadTime;
+	private Timestamp deadTime;
 	
 	private PeerStatus status;
 	
-	private Controller controller;
+	private SDNController controller;
 	
 	public Peer(){
 		
@@ -51,11 +49,11 @@ public class Peer implements Serializable{
 	}
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "CONTROLLER_ID", nullable = false)
-	public Controller getController() {
+	@JoinColumn(name = "CONTROLLER_IP", nullable = false)
+	public SDNController getSDNController() {
 		return controller;
 	}
-	public void setController(Controller controller) {
+	public void setSDNController(SDNController controller) {
 		this.controller = controller;
 	}
 	
@@ -78,11 +76,11 @@ public class Peer implements Serializable{
 	}
 	
 	@Column(name = "PEER_DEAD_TIME")
-	public Date getDeadTime() {
+	public Timestamp getDeadTime() {
 		return deadTime;
 	}
-	public void setDeadTime(Date deadTime) {
-		this.deadTime = deadTime;
+	public void setDeadTime(Timestamp timestamp) {
+		this.deadTime = timestamp;
 	}
 	
 	@Column(name = "PEER_STATUS")

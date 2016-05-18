@@ -14,7 +14,7 @@ public class DiscoveryConfig {
 	int PORT;
 	
 	@JsonProperty("national_ctrl")
-	Controller NATIONAL_CONTROLLER;
+	SDNController NATIONAL_CONTROLLER;
 	
 	public InetAddress getMULTICAST_GROUP() {
 		return MULTICAST_GROUP;
@@ -28,10 +28,10 @@ public class DiscoveryConfig {
 	public void setPORT(int pORT) {
 		PORT = pORT;
 	}
-	public Controller getNATIONAL_CONTROLLER() {
+	public SDNController getNATIONAL_CONTROLLER() {
 		return NATIONAL_CONTROLLER;
 	}
-	public void setNATIONAL_CONTROLLER(Controller nATIONAL_CONTROLLER) {
+	public void setNATIONAL_CONTROLLER(SDNController nATIONAL_CONTROLLER) {
 		NATIONAL_CONTROLLER = nATIONAL_CONTROLLER;
 	}
 	

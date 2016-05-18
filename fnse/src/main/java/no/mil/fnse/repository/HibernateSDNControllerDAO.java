@@ -3,36 +3,35 @@ package no.mil.fnse.repository;
 import java.net.InetAddress;
 import java.util.Collection;
 
+import javax.transaction.Transactional;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-//import org.apache.log4j.Logger;
-import org.springframework.stereotype.Service;
 
-import no.mil.fnse.model.Controller;
+import no.mil.fnse.model.SDNController;
 
-@Service
-@Component("hibernateControllerDAO")
-public class HibernateControllerDAO implements ControllerDAO {
-
-	static Logger logger = Logger.getLogger(HibernateControllerDAO.class);
+@Transactional
+@Component("hibernateSDNControllerDAO")
+public class HibernateSDNControllerDAO implements SDNControllerDAO{
+	static Logger logger = Logger.getLogger(HibernateSDNControllerDAO.class);
 	
 	@Autowired
 	public SessionFactory sessionFactory;
 	
-	public HibernateControllerDAO(){
+	public HibernateSDNControllerDAO(){
 		
 	}
-	public HibernateControllerDAO(SessionFactory session){
+	public HibernateSDNControllerDAO(SessionFactory session){
 		this.sessionFactory = session;
 	}
 	
-	public int saveController(Controller controller) {
+	public int saveSDNController(SDNController controller) {
 		try{
-			if(getControllerByIp(controller.getIpAddress())==null){
+			if(getSDNControllerByIp(controller.getIpAddress())==null){
 				int id = (Integer) sessionFactory.getCurrentSession().save(controller);
 				logger.info("New controller added: " + controller.getIpAddress());
 				return id;
@@ -46,20 +45,20 @@ public class HibernateControllerDAO implements ControllerDAO {
 	}
 
 
-	public Controller getController(int id) {
+	public SDNController getSDNController(int id) {
 		try {
-			return (Controller) sessionFactory.getCurrentSession().get(Controller.class, id);
+			return (SDNController) sessionFactory.getCurrentSession().get(SDNController.class, id);
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
 			return null;
 		}
 	}
 
-	public Controller getControllerByIp(InetAddress ip) {
+	public SDNController getSDNControllerByIp(InetAddress ip) {
 		try {
-			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Controller.class);
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(SDNController.class);
 			criteria.add(Restrictions.eq("ipAddress", ip));
-			return (Controller) criteria.uniqueResult();
+			return (SDNController) criteria.uniqueResult();
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
 			return null;
@@ -67,16 +66,16 @@ public class HibernateControllerDAO implements ControllerDAO {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Collection<Controller> getAllControllers() {
+	public Collection<SDNController> getAllSDNControllers() {
 		try {
-			return sessionFactory.getCurrentSession().createQuery("FROM Controller order by id").list();
+			return sessionFactory.getCurrentSession().createQuery("FROM SDNController order by id").list();
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
 			return null;
 		}
 	}
 
-	public void delController(Controller controller) {
+	public void delSDNController(SDNController controller) {
 		try {
 			sessionFactory.getCurrentSession().delete(controller);
 		} catch (RuntimeException re) {
@@ -84,5 +83,4 @@ public class HibernateControllerDAO implements ControllerDAO {
 		}
 		
 	}
-
 }

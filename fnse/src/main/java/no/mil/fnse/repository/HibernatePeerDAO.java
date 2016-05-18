@@ -1,7 +1,10 @@
 package no.mil.fnse.repository;
 
 import java.net.InetAddress;
+import java.sql.Timestamp;
 import java.util.Collection;
+
+import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
@@ -9,12 +12,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import no.mil.fnse.model.Controller;
+import no.mil.fnse.model.SDNController;
 import no.mil.fnse.model.Peer;
 
-@Service
+@Transactional
 @Component("hibernatePeerDAO")
 public class HibernatePeerDAO implements PeerDAO{
 	
@@ -94,7 +96,7 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 
-	public Collection<Peer> getAllPeersWithController(Controller controller) {
+	public Collection<Peer> getAllPeersWithSDNController(SDNController controller) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
 			criteria.add(Restrictions.eq("controller", controller));
@@ -112,6 +114,28 @@ public class HibernatePeerDAO implements PeerDAO{
 			logger.error("Attached failed" + re);
 		}
 	}
-	
+	@Override
+	public void updatePeer(Peer peer) {
+		try{
+			Peer peerToChange = getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp());
+			peerToChange.setSDNController(peer.getSDNController());
+			peerToChange.setDeadTime(peer.getDeadTime());
+			peerToChange.setStatus(peer.getStatus());
+			sessionFactory.getCurrentSession().update(peerToChange);
+		}catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
 
+		}
+	}
+	@Override
+	public Collection<Peer> getAllDeadPeers(Timestamp time) {
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
+			criteria.add(Restrictions.le("deadTime", time));
+			return  criteria.list();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
+	}
 }

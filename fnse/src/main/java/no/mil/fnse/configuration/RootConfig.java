@@ -18,18 +18,20 @@ import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import no.mil.fnse.model.Controller;
 import no.mil.fnse.model.Peer;
+import no.mil.fnse.model.SDNController;
 
 import org.springframework.context.annotation.Configuration;
 
 
 //beans are typically the middle-tier and data-tier components that drive the back end of the application
 @Configuration
-@ComponentScan(basePackages={"no.mil.fnse"})
+@ComponentScan(basePackages={"no.mil.fnse","no.mil.fnse.repository","no.mil.fnse.service"})
+@EnableTransactionManagement
 @EnableScheduling
 public  class RootConfig  implements SchedulingConfigurer{
 	static Logger logger = Logger.getLogger(RootConfig.class);
@@ -39,7 +41,7 @@ public  class RootConfig  implements SchedulingConfigurer{
 		sessionFactory.setDataSource(dataSource);
 	//	 ((Object) sessionFactory).setPackagesToScan(new String[]{"no.cyfor.zelus.news_stand.dao.hibernate"});
 		sessionFactory.setAnnotatedPackages(new String[] { "no.mil.fnse"});
-		sessionFactory.setAnnotatedClasses(new Class[] {Controller.class, Peer.class});
+		sessionFactory.setAnnotatedClasses(new Class[] {SDNController.class, Peer.class});
 		//sessionFactory.setMappingResources(;//, "model.KeyWord", "model.Search", "model.Publisher" });
 		sessionFactory.setHibernateProperties(hibernateProperties());
 		logger.info("SessionFatory: " + sessionFactory);

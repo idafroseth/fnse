@@ -1,9 +1,10 @@
 package no.mil.fnse.repository;
 
 import java.net.InetAddress;
+import java.sql.Timestamp;
 import java.util.Collection;
 
-import no.mil.fnse.model.Controller;
+import no.mil.fnse.model.SDNController;
 import no.mil.fnse.model.Peer;
 
 public interface PeerDAO {
@@ -55,11 +56,27 @@ public interface PeerDAO {
 	 * @param  controller
 	 * @return the collection of peers or null if it does not exists
 	 */
-	Collection<Peer> getAllPeersWithController(Controller controller);
+	Collection<Peer> getAllPeersWithSDNController(SDNController controller);
+	
+	/**
+	 * Returns all the SDNControllers in the database which is dead
+	 * @return
+	 */
+	Collection<Peer> getAllDeadPeers(Timestamp time);
+	
 	
 	/**
 	 * Deletes a peer
 	 * @param peer the peer to delete
 	 */
 	void delPeer(Peer peer);
+	
+	/**
+	 * Updates a peer with the correct time and controller
+	 * @param time
+	 * @param controller
+	 */
+	void updatePeer(Peer peer);
+	
+	
 }
