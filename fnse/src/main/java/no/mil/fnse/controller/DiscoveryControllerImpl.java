@@ -2,6 +2,7 @@ package no.mil.fnse.controller;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +21,8 @@ import no.mil.fnse.model.SDNController;
 import no.mil.fnse.repository.PeerDAO;
 import no.mil.fnse.model.Peer;
 import no.mil.fnse.service.DiscoveryService;
+import no.mil.fnse.southbound.dao.RouterDAO;
+import no.mil.fnse.southbound.model.Router;
 
 @Service
 public class DiscoveryControllerImpl implements DiscoveryController {
@@ -32,6 +35,9 @@ public class DiscoveryControllerImpl implements DiscoveryController {
 
 	@Autowired
 	PeerDAO hibernatePeerDAO;
+	
+	@Autowired
+	RouterDAO vtyRouterDAO;
 	
 	/**
 	 * Sends a HELLO message every HELLO_INTERVAL
@@ -68,15 +74,16 @@ public class DiscoveryControllerImpl implements DiscoveryController {
 							.getEntityId()) {
 
 						Peer neighbor = new Peer();
-
+						
+						
 						neighbor.setRemoteInterfaceIp(msgPacket.getAddress());
-						//This is just for testing has to be updated
-						neighbor.setLocalInterfaceIp(msgPacket.getAddress());
-						neighbor.setSDNController(ctrl);
-						neighbor.setDeadTime(new Timestamp(System.currentTimeMillis() + neighbor.getSDNController().getHelloInterval() * 3 * 1000));
+
+						neighbor.setLocalInterfaceIp(findLocalIp(msgPacket.getAddress()));
+						neighbor.setController(ctrl);
+						neighbor.setDeadTime(new Timestamp(System.currentTimeMillis() + neighbor.getController().getHelloInterval() * 3 * 1000));
 						discoveryServiceImpl.discoverdNeighbor(neighbor);
 						logger.info("Discovered:" + ctrl.getEntityId() + ctrl.getIpAddress()
-								+ neighbor.getRemoteInterfaceIp());
+								+ neighbor.getRemoteInterfaceIp() + " attached to " + neighbor.getLocalInterfaceIp());
 						
 						// listenerThreads--;
 					}
@@ -98,6 +105,13 @@ public class DiscoveryControllerImpl implements DiscoveryController {
 		Collection<Peer> deadPeers = hibernatePeerDAO.getAllDeadPeers(new Timestamp(System.currentTimeMillis()));
 		System.out.println("Dead peers: " + deadPeers);
 		System.out.println("If the list isnt empty we have to remove the configuration of all the peers");
+	}
+	
+	private InetAddress findLocalIp(InetAddress remoteIp){
+		for(Router router : DiscoveryConfiguration.DISCOVERY_CONFIG.getNetworkElements()){
+			return(vtyRouterDAO.getIpMrouteSource(router, remoteIp).get(0));
+		}
+		return null;
 	}
 
 }

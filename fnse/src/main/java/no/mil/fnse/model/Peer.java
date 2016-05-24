@@ -48,15 +48,6 @@ public class Peer implements Serializable{
 		this.id = id;
 	}
 	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "CONTROLLER_IP", nullable = false)
-	public SDNController getSDNController() {
-		return controller;
-	}
-	public void setSDNController(SDNController controller) {
-		this.controller = controller;
-	}
-	
 	@Column(name = "PEER_LOCAL_IP", nullable = false)
 	@Id
 	public InetAddress getLocalInterfaceIp() {
@@ -89,6 +80,16 @@ public class Peer implements Serializable{
 	}
 	public void setStatus(PeerStatus status) {
 		this.status = status;
+	}
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "CONTROLLER_IP", nullable = false)
+	public SDNController getController() {
+		return controller;
+	}
+
+	public void setController(SDNController controller) {
+		this.controller = controller;
 	}
 	
 	

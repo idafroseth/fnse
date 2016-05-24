@@ -6,6 +6,7 @@ import java.util.Map;
 
 import no.mil.fnse.model.Peer;
 import no.mil.fnse.southbound.model.BGPPeer;
+import no.mil.fnse.southbound.model.Router;
 
 public interface RouterDAO {
 	
@@ -32,7 +33,7 @@ public interface RouterDAO {
 	 * Query the networking element for the multicast routing table
 	 * @return a list of IPaddresses of remote peer and interface of local peer
 	 */
-	InetAddress getIpMrouteSource(InetAddress remotePeer);
+	List<InetAddress> getIpMrouteSource(Router router, InetAddress remotePeer);
 	
 	/**
 	 * show ip bgp summary

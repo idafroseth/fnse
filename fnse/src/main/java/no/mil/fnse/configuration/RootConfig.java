@@ -57,7 +57,7 @@ public  class RootConfig  implements SchedulingConfigurer{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		dataSource.setJdbcUrl("jdbc:postgresql:news_stand");
+		dataSource.setJdbcUrl("jdbc:postgresql:fnse");
 		dataSource.setUser("zelus");
 		dataSource.setPassword("admin123");
 

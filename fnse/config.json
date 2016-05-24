@@ -2,28 +2,15 @@
 	"multicast_ip":"239.1.1.1",
 	"port":"5000",
 	"national_ctrl":{
-		"ip":"47.0.0.2",
-		"id":"47",
+		"ip":"46.0.0.2",
+		"id":"46",
 		"i":"30"
 	},
 	"network_elements":[
-		"network_element":{
-			"management_ip":"47.0.0.1",
+		{
+			"managementIp":"46.0.0.1",
 			"username":"cisco",
-			"password":"cisco",
-			"interfaces":[
-				"interface":{
-					"name":"gigabitEthernet 0/1",
-					"description":"WAN interface",
-					"ip":"114.47.0.1",
-					"nat":"outside"
-				},
-				 "interface":{     
-                                        "name":"gigabitEthernet 0/2",
-					"description":"LAN interface",
-                                        "ip":"47.0.0.1",
-					"nat":"inside"
-                                }
-			]	
+			"password":"cisco"
+		}
 	]
 }

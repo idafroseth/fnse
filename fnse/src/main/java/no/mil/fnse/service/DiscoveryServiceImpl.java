@@ -71,11 +71,11 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 	 * the peer.
 	 */
 	public void addNeighbor(Peer neighbor) {
-		if (hibernateSDNControllerDAO.getSDNControllerByIp(neighbor.getSDNController().getIpAddress()) == null) {
-			hibernateSDNControllerDAO.saveSDNController(neighbor.getSDNController());
+		if (hibernateSDNControllerDAO.getSDNControllerByIp(neighbor.getController().getIpAddress()) == null) {
+			hibernateSDNControllerDAO.saveSDNController(neighbor.getController());
 		}
 
-		neighbor.setSDNController(hibernateSDNControllerDAO.getSDNControllerByIp(neighbor.getSDNController().getIpAddress()));
+		neighbor.setController(hibernateSDNControllerDAO.getSDNControllerByIp(neighbor.getController().getIpAddress()));
 		hibernatePeerDAO.savePeer(neighbor);
 	}
 

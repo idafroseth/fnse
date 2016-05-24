@@ -16,11 +16,13 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name="controller")
 public class SDNController {
+
 
 	@JsonProperty("ip")
 	InetAddress ipAddress;

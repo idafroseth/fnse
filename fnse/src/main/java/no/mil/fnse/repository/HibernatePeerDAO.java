@@ -118,7 +118,7 @@ public class HibernatePeerDAO implements PeerDAO{
 	public void updatePeer(Peer peer) {
 		try{
 			Peer peerToChange = getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp());
-			peerToChange.setSDNController(peer.getSDNController());
+			peerToChange.setController(peer.getController());
 			peerToChange.setDeadTime(peer.getDeadTime());
 			peerToChange.setStatus(peer.getStatus());
 			sessionFactory.getCurrentSession().update(peerToChange);

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Implementation-Title: fnse
-Implementation-Version: 0.1.5
+Implementation-Version: 0.1.7
 Built-By: Zelus
 Implementation-Vendor-Id: no.mil
 Build-Jdk: 1.8.0_60
