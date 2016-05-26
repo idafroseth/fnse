@@ -1,0 +1,18 @@
+package no.mil.fnse.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AutoconfigurationController {
+
+    @RequestMapping("/api/configuration/local/{connection-id}")
+    public String getLocalConfig() {
+        return "Here you go, I will send you the configuration!";
+    }
+    
+    @RequestMapping("/api/configuration/global")
+    public String getGlobalConfig() {
+        return "Here you go, I will send you the configuration!";
+    }
+}

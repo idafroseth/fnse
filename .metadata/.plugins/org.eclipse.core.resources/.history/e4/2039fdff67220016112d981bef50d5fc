@@ -1,0 +1,22 @@
+package no.mil.fnse.southbound.model;
+
+import java.util.Collection;
+
+public class GigabitEthernet extends NetworkInterface{
+	
+	private Collection<SubInterface> subinterfaces;
+	
+	public GigabitEthernet(){
+	}
+
+	public Collection<SubInterface> getSubinterfaces() {
+		return subinterfaces;
+	}
+
+	public void setSubinterfaces(Collection<SubInterface> subinterfaces) {
+		this.subinterfaces = subinterfaces;
+	}
+	
+	
+
+}

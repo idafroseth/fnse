@@ -1,0 +1,13 @@
+package no.mil.fnse.dao;
+
+public interface RouterDAO {
+	
+	/**
+	 * Configure a new Peer
+	 * @param peer
+	 * @return
+	 */
+	boolean configurePeer(Peer peer);
+	
+
+}

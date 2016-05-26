@@ -1,0 +1,130 @@
+package no.mil.fnse.southbound.model;
+
+import java.net.InetAddress;
+
+import org.apache.log4j.Logger;
+
+import com.cisco.onep.core.exception.OnepConnectionException;
+import com.cisco.onep.core.exception.OnepDuplicateElementException;
+import com.cisco.onep.core.exception.OnepException;
+import com.cisco.onep.core.exception.OnepIllegalArgumentException;
+import com.cisco.onep.core.exception.OnepInvalidSettingsException;
+import com.cisco.onep.core.exception.OnepRemoteProcedureException;
+import com.cisco.onep.core.util.OnepConstants;
+import com.cisco.onep.element.ElementDescription;
+import com.cisco.onep.element.NetworkApplication;
+import com.cisco.onep.element.NetworkElement;
+import com.cisco.onep.element.SessionConfig;
+import com.cisco.onep.element.SessionConfig.SessionTransportMode;
+import com.cisco.onep.location.Location;
+import com.cisco.onep.vty.VtyService;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+public class Router {
+
+	private InetAddress managementIp;
+	private String username;
+	private String password;
+	
+	@JsonIgnore
+	private NetworkElement networkElement;
+
+	@JsonIgnore
+	private VtyService vty;
+
+	static Logger logger = Logger.getLogger(Router.class);
+
+	public Router() {
+	}
+
+	public boolean connect() {
+		if (managementIp != null && username != null && password != null) {
+			try {
+				System.out.println("Trying to connect with: " +this.username +" and "+ this.password);
+				getNetworkElement().connect(this.username, this.password, getSessionConfig());
+				logger.info("Successfully connected to network element " + this.getManagementIp());
+				return true;
+			} catch (OnepConnectionException | OnepIllegalArgumentException | OnepDuplicateElementException e) {
+				logger.error("Attached failed: " + e);
+				return false;
+			}
+		} else {
+			logger.error("username, password or management IP isnt set");
+			return false;
+		}
+	}
+
+	/**
+	 * Open av vty channel to the NE
+	 */
+	public void vtyOpen() {
+		try {
+			
+			setVty(new VtyService(getNetworkElement()));
+			getVty().open();
+		} catch (OnepException e) {
+			logger.error("Could not open VTY SERVICE! The networkElement is probably not configured correctly");
+		} catch (InterruptedException e) {
+			logger.error("Could not open VTY SERVICE! The networkElement is probably not configured correctly");
+		}
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getUsername() {
+		return this.username;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getPassword() {
+		return this.password;
+	}
+
+	public InetAddress getManagementIp() {
+		return managementIp;
+	}
+
+	public void setManagementIp(InetAddress managementIp) {
+		this.managementIp = managementIp;
+	}
+
+	public VtyService getVty() {
+		return vty;
+	}
+
+	public void setVty(VtyService vty) {
+		this.vty = vty;
+	}
+	
+
+	public NetworkElement getNetworkElement() {
+		return networkElement;
+	}
+
+	public void setNetworkElement(NetworkElement networkElement) {
+		this.networkElement = networkElement;
+	}
+
+	/**
+	 * This method will return a certificate session config. You have to create
+	 * a certificate on the router to have this function working.
+	 * 
+	 * @return sessionConfig based on TLS (Certificate based connection)
+	 */
+	private SessionConfig getSessionConfig() {
+		SessionConfig sessionConfig;
+		// TLS is the default connection supported
+		sessionConfig = new SessionConfig(SessionTransportMode.TLS);
+		sessionConfig.setPort(OnepConstants.ONEP_TLS_PORT);
+		// Enable tls pinning
+		sessionConfig.setTLSPinning("PinningFile", new TLSPinningHandler("PinningFile"));
+		return sessionConfig;
+	}
+
+}

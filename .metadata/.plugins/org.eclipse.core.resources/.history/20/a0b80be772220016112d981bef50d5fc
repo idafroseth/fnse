@@ -1,0 +1,13 @@
+package no.mil.fnse.southbound.model.configuration;
+
+import no.mil.fnse.southbound.model.NetworkInterface;
+
+public class MsdpConfig {
+	NetworkInterface loopbackInterface;
+	
+	@JsonIgnore
+	InetAddress peer;
+	
+	
+
+}

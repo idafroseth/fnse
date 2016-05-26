@@ -1,0 +1,5 @@
+package no.mil.fnse.repository;
+
+public class SDNControllerDAO {
+
+}

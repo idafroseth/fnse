@@ -1,0 +1,8 @@
+package no.mil.fnse.southbound.model.configuration;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class NtpConfig {
+	@JsonIgnore
+	private int id;
+}

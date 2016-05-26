@@ -1,0 +1,22 @@
+package no.mil.fnse.southbound.model.configuration;
+
+import java.net.InetAddress;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import no.mil.fnse.southbound.model.NetworkInterface;
+
+public class MsdpConfig {
+	
+	private NetworkInterface loopbackInterface;
+	
+	private InetAddress peerConfig;
+	
+	@JsonIgnore
+	private InetAddress peer;
+	
+	
+	
+	
+
+}

@@ -1,0 +1,10 @@
+package no.mil.fnse.southbound.model;
+
+public class AddressfamilySetting {
+	private boolean activated;
+	private Integer distributelistIn;
+	private Integer distributelistOut;
+	private String prefixlistIn;
+	private String prefixlistOut;
+
+}

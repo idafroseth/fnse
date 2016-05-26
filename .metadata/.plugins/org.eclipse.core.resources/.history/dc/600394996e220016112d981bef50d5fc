@@ -1,0 +1,8 @@
+package no.mil.fnse.service;
+
+import java.net.InetAddress;
+
+public interface SouthboundCommunication {
+
+	
+}

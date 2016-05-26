@@ -1,0 +1,8 @@
+package no.mil.fnse.service;
+
+public interface AutoconfigurationService {
+	
+	GlobalConfiguration getGlobalConfiguration(String localIp, String remoteIp){
+		
+	}
+}

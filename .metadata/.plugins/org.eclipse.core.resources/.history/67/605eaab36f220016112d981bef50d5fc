@@ -1,0 +1,47 @@
+package no.mil.fnse.southbound.model;
+
+public class AddressfamilySetting {
+	private boolean activated;
+	private String distributelistIn;
+	private String distributelistOut;
+	private String prefixlistIn;
+	private String prefixlistOut;
+	
+	public AddressfamilySetting(){
+		
+	}
+	
+	public boolean isActivated() {
+		return activated;
+	}
+	public void setActivated(boolean activated) {
+		this.activated = activated;
+	}
+	public Distributelist getDistributelistIn() {
+		return distributelistIn;
+	}
+	public void setDistributelistIn(Distributelist distributelistIn) {
+		this.distributelistIn = distributelistIn;
+	}
+	public Distributelist getDistributelistOut() {
+		return distributelistOut;
+	}
+	public void setDistributelistOut(Distributelist distributelistOut) {
+		this.distributelistOut = distributelistOut;
+	}
+	public Prefixlist getPrefixlistIn() {
+		return prefixlistIn;
+	}
+	public void setPrefixlistIn(Prefixlist prefixlistIn) {
+		this.prefixlistIn = prefixlistIn;
+	}
+	public Prefixlist getPrefixlistOut() {
+		return prefixlistOut;
+	}
+	public void setPrefixlistOut(Prefixlist prefixlistOut) {
+		this.prefixlistOut = prefixlistOut;
+	}
+	
+	
+
+}

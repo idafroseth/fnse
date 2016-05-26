@@ -1,0 +1,36 @@
+package no.mil.fnse.service;
+
+import no.mil.fnse.model.Peer;
+
+public interface DiscoveryService {
+
+	/**
+	 * Periodically send Hello messages to remote peer. The HELLO message is a 
+	 * multicast to a designated address and port. Advertising its controller IP address. 
+	 */
+	void sendHello();
+	
+	/**
+	 * Listen to incomming messages. When a message arrive it check wether the peer is configured and if it isnt it does that. 
+	 */
+	void listenHello();
+	
+	/**
+	 * Perodically checks if a peer is dead
+	 * It is achieved by retriving a list of all the peers in the database.
+	 * It compares the peers HELLO interval*3 + last seen timestamp with the current time.
+	 * For nodes exceeding the dead interval it will be stamped with DEAD status.
+	 */
+	void checkDeadPeer();
+	
+
+	void discoverdNeighbor(Peer neighbor);
+	
+	/**
+	 * Add a remote neighbor by first checking if its controller exsist. If the
+	 * controller doesn´t exsist it will first add the controller before it adds
+	 * the peer.
+	 * @param neighbor
+	 */
+	void addNeighbor(Peer neighbor);
+}

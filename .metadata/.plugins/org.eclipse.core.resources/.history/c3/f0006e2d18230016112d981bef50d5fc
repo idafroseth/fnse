@@ -1,0 +1,117 @@
+package no.mil.fnse.southbound.dao;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
+
+import no.mil.fnse.discovery.configuration.DiscoveryConfiguration;
+import no.mil.fnse.discovery.service.DiscoveryServiceImpl;
+import no.mil.fnse.model.Peer;
+import no.mil.fnse.southbound.model.BgpPeer;
+import no.mil.fnse.southbound.model.Router;
+
+@Component("vtyRouterDAO")
+public class VtyRouterDAO implements RouterDAO {
+
+	static Logger logger = Logger.getLogger(DiscoveryServiceImpl.class);
+
+	@Override
+	public boolean addNeighbor(Peer neighbor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean deleteNeighbor(Peer neighbor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public List<Peer> getAllConfiguredPeer() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InetAddress getIpMrouteSource(Router router, InetAddress remotePeer) {
+		String response = router.getVty();
+//				.send("show ip mroute " + remotePeer.toString().substring(1) + " "
+//						+ DiscoveryConfiguration.DISCOVERY_CONFIG.getMULTICAST_GROUP().toString().substring(1)
+//						+ " | include Incoming interface");
+//		logger.debug("Trying to getIpMrouteSource: show ip mroute " + remotePeer.toString().substring(1) + " "
+//				+ DiscoveryConfiguration.DISCOVERY_CONFIG.getMULTICAST_GROUP() + " | include Incoming interface");
+
+		String ifName = findWordWithPattern("Ethernet", response);
+		
+		logger.debug(ifName + " Is this the GI from " + response);
+
+		return getInterfaceIp(router, ifName);
+	}
+	
+	/**
+	 * Get the primary interface ip of a named interface. 
+	 * @param router
+	 * @param interfaceName
+	 * @return
+	 */
+	private InetAddress getInterfaceIp(Router router, String interfaceName){
+		try {
+			return InetAddress.getByName(findWordWithPattern("\\.", router.getVty().send("show run interface " + interfaceName + " | include ip address") ));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			logger.error("Attached failed: " +e);
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	private InetAddress getSecondaryInterfaceIp(Router router, String interfaceName){
+		try {
+			return InetAddress.getByName(findWordWithPattern("\\.", router.getVty().send("show run interface " + interfaceName + " | include secondary") ));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			logger.error("Attached failed: " +e);
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+
+	@Override
+	public List<BgpPeer> getBGPNeighbors() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/**
+	 * Search for a searchString in a text and return the entire word. return null if the text does not contain the pattern.
+	 * @param searchString
+	 * @param text
+	 * @return the first word containing the pattern
+	 */
+	public String findWordWithPattern(String searchString, String text){
+		
+		String sPattern = "(?i)\\b\\S*" +searchString + "\\S*\\b";
+	    Pattern pattern = Pattern.compile(sPattern);
+	    Matcher matcher = pattern.matcher(text);
+	    while(matcher.find()){
+	    	return matcher.group();
+	    }
+	    return null;
+	}
+	
+	
+	
+//	public static void main(String[] args){
+//		VtyRouterDAO vty = new VtyRouterDAO();
+//		System.out.println(vty.findWordWithPattern("A", "  ip address 114.47.0.1 255.0.0.0"));
+//	}
+	
+
+}

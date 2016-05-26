@@ -1,0 +1,179 @@
+package no.mil.fnse.service;
+
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.sql.Timestamp;
+import java.util.Collection;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import no.mil.fnse.configuration.DiscoveryConfiguration;
+import no.mil.fnse.model.Peer;
+import no.mil.fnse.model.SDNController;
+import no.mil.fnse.model.values.PeerStatus;
+import no.mil.fnse.repository.PeerDAO;
+import no.mil.fnse.repository.SDNControllerDAO;
+import no.mil.fnse.southbound.dao.RouterDAO;
+import no.mil.fnse.southbound.model.Router;
+
+@Service
+@Component("discoveryServiceImpl")
+public class DiscoveryServiceImpl implements DiscoveryService {
+	static Logger logger = Logger.getLogger(DiscoveryServiceImpl.class);
+
+	@Autowired
+	SDNControllerDAO hibernateSDNControllerDAO;
+
+	@Autowired
+	PeerDAO hibernatePeerDAO;
+	
+
+	@Autowired
+	RouterDAO vtyRouterDAO;
+	
+	public DiscoveryServiceImpl(){
+		
+	}
+
+	public void checkDeadPeer() {
+		// TODO Auto-generated method stub
+		/*
+		 * Check database where current date time > timestamp and not marked as
+		 * DEAD
+		 * 
+		 */
+
+	}
+
+	@Override
+	public void discoverdNeighbor(Peer neighbor) {
+		// TODO Auto-generated method stub
+		// Vi må legge til Peer i controller
+
+		/*
+		 * 1) Sjekk om nabo eksiterer i databasen 1.1) Hvis nei - 1.1.1) sjekk
+		 * om kontroller ligger i databasend 1.1.1.1) Hvis nei, legg til
+		 * kontroller (som også relasjon til peer) 1.1.1.2) Hvis ja, oppdater
+		 * kontroller med peer (forutsetter at peer er lagt inn) 1.1.2) Legg til
+		 * nabo med riktig 1.2)Hvis Ja: 1.2.1) oppdater tidstempel og kontroller
+		 */
+		Peer peerInDB = hibernatePeerDAO.getPeerByIp(neighbor.getLocalInterfaceIp(), neighbor.getRemoteInterfaceIp());
+		if (peerInDB == null) {
+			neighbor.setStatus(PeerStatus.DISCOVERED);
+			addNeighbor(neighbor);
+			logger.info("New peer discovered: " + neighbor.getLocalInterfaceIp() + ", " + neighbor.getRemoteInterfaceIp());
+		} else {
+			//Vi må sjekke om den er markert som DEAD - hvis den er det må vi sette den som discovered
+			if(peerInDB.getStatus().equals(PeerStatus.DEAD)){
+				neighbor.setStatus(PeerStatus.DISCOVERED);
+			}else{
+				neighbor.setStatus(peerInDB.getStatus());
+			}
+			hibernatePeerDAO.updatePeer(neighbor);
+		}
+
+	}
+
+	/**
+	 * Add a remote neighbor by first checking if its controller exsist. If the
+	 * controller doesn´t exsist it will first add the controller before it adds
+	 * the peer.
+	 */
+	public void addNeighbor(Peer neighbor) {
+		if (hibernateSDNControllerDAO.getSDNControllerByIp(neighbor.getController().getIpAddress()) == null) {
+			hibernateSDNControllerDAO.saveSDNController(neighbor.getController());
+		}
+
+		neighbor.setController(hibernateSDNControllerDAO.getSDNControllerByIp(neighbor.getController().getIpAddress()));
+		hibernatePeerDAO.savePeer(neighbor);
+	}
+	boolean isListening = false;
+
+
+
+	/**
+	 * Sends a HELLO message every HELLO_INTERVAL
+	 */
+	@Scheduled(initialDelay = 11 * 1000, fixedRate = 30000)
+	public void sendHello() {
+		try {
+			DiscoveryConfiguration.SERVER_SOCKET.send(DiscoveryConfiguration.HELLO_PACKET);
+			logger.info("Sending HELLO");
+		} catch (IOException re) {
+			logger.error("Attached failed" + re);
+		}
+	}
+
+	@Scheduled(initialDelay = 10 * 1000, fixedDelay = 1)
+	public void listenHello() {
+		logger.info("Setting up listener port");
+		if (!isListening) {
+			byte[] buf = new byte[85];
+			while (true) {
+				// Receive the information
+				DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
+				try {
+					DiscoveryConfiguration.CLIENT_SOCKET.receive(msgPacket);
+					String msg = new String(buf, 0, buf.length);
+					ObjectMapper mapper = new ObjectMapper();
+					SDNController ctrl;
+
+					ctrl = mapper.readValue(msg, SDNController.class);
+					logger.info("Found neighbor with id " + ctrl.getEntityId());
+
+					// Hvis det er en melding sent fra denne controlleren så
+					// overser vi denne pakken
+					if (ctrl.getEntityId() != DiscoveryConfiguration.DISCOVERY_CONFIG.getNATIONAL_CONTROLLER()
+							.getEntityId()) {
+
+						Peer neighbor = new Peer();
+
+						neighbor.setRemoteInterfaceIp(msgPacket.getAddress());
+						neighbor.setLocalInterfaceIp(findLocalIp(msgPacket.getAddress()));
+						neighbor.setController(ctrl);
+						neighbor.setDeadTime(new Timestamp(
+								System.currentTimeMillis() + neighbor.getController().getHelloInterval() * 3 * 1000));
+						discoveryServiceImpl.discoverdNeighbor(neighbor);
+						logger.info("Discovered:" + ctrl.getEntityId() + ctrl.getIpAddress()
+								+ neighbor.getRemoteInterfaceIp() + " attached to " + neighbor.getLocalInterfaceIp());
+
+						// listenerThreads--;
+					}
+				} catch (IOException re) {
+					logger.error("Attached failed" + re);
+				}
+			}
+		}
+
+	}
+
+	@Scheduled(initialDelay = 12 * 1000, fixedRate = 10 * 1000)
+	@Override
+	public void checkDeadPeer() {
+		Collection<Peer> deadPeers = hibernatePeerDAO.getAllDeadPeers(new Timestamp(System.currentTimeMillis()));
+		logger.info("Dead peers: " + deadPeers);
+
+		// REMOVE THE PAIR
+	}
+
+	private InetAddress findLocalIp(InetAddress remoteIp) {
+		for (Router router : DiscoveryConfiguration.DISCOVERY_CONFIG.getNetworkElements()) {
+			InetAddress localIp = vtyRouterDAO.getIpMrouteSource(router, remoteIp);
+			if (localIp == null) {
+				continue;
+			}
+			return localIp;
+		}
+		return null;
+	}
+	
+
+}

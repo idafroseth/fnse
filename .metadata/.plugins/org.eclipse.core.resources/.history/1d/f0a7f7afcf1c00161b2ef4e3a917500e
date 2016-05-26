@@ -1,0 +1,7 @@
+package no.mil.fnse.service;
+
+public interface DiscoveryService {
+
+
+	 
+}

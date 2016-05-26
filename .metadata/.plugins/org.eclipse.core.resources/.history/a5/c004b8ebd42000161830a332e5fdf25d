@@ -1,0 +1,6 @@
+package no.mil.fnse.southbound.model;
+
+public abstract class RouterMixIn {
+	@JsonIgnore public Location location;
+
+}

@@ -1,0 +1,7 @@
+package no.mil.fnse.southbound.model.configuration;
+
+public class BgpConfig {
+	private String routerId;
+	private Collection<BgpPeer> neighbors;
+
+}

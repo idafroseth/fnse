@@ -1,0 +1,6 @@
+package no.mil.fnse.southbound.model;
+
+public enum Duplexmode {
+	auto, full, half;
+	
+}

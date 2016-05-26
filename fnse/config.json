@@ -1,16 +1,22 @@
-{
+"Baseconfig":{
 	"multicast_ip":"239.1.1.1",
 	"port":"5000",
 	"national_ctrl":{
-		"ip":"46.0.0.2",
-		"id":"46",
-		"i":"30"
+		"ip":"47.0.0.2",
+		"id":"47",
 	},
 	"network_elements":[
 		{
-			"managementIp":"46.0.0.1",
+			"managementIp":"47.0.0.1",
 			"username":"cisco",
 			"password":"cisco"
 		}
 	]
+}
+"DiscoveryConfig":{
+	"national_ctrl":{
+		"ip":47.0.0.2",
+		"id":47,
+		"i":"30"
+	}
 }

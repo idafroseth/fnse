@@ -1,0 +1,7 @@
+package no.mil.fnse.southbound.model;
+
+public class SubInterface extends NetworkInterface {
+	private Integer vlan;
+	private String encapsulation;
+
+}

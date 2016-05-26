@@ -1,0 +1,9 @@
+package no.mil.fnse.southbound.model;
+
+public class GigabitEthernet extends NetworkInterface{
+	private String interfaceName;
+	
+	public GigabitEthernet(){
+	}
+
+}

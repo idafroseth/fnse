@@ -1,0 +1,10 @@
+package no.mil.fnse.southbound.model;
+
+public class BGPPeer {
+	private String routerId;
+	private String remoteAs;
+	private Short ebgpMultihop;
+	private AdressFamilySetting ipv4Settings;
+	private AddressFamilySetting ipv6Setting;
+
+}

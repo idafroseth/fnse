@@ -1,0 +1,7 @@
+package no.mil.fnse.southbound.model;
+
+public class IpNetwork {
+		private InetAddress ipaddress;
+		private netmask netmask;
+
+}

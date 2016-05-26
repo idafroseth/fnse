@@ -1,0 +1,23 @@
+package no.mil.fnse.controller;
+
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AutoconfigurationController {
+
+	/**
+	 * To fetch the tunnel configuration.
+	 * @return json
+	 */
+    @RequestMapping("/api/configuration/local/{remote-ip}/{local-ip}")
+    public String getLocalConfig() {
+        return "Here you go, I will send you the configuration!";
+    }
+    
+    @RequestMapping("/api/configuration/global/{remote-ip}/{local-ip}")
+    public String getGlobalConfig(@PathVariable String remote-ip, @PathVariable String loca-ip) {
+        return "Here you go, I will send you the configuration!";
+    }
+}

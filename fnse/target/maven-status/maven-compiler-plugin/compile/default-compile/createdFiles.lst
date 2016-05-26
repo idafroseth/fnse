@@ -1,0 +1,6 @@
+no/mil/fnse/discovery/service/DiscoveryServiceImpl.class
+no/mil/fnse/Application.class
+no/mil/fnse/discovery/service/DiscoveryService.class
+no/mil/fnse/configuration/DiscoveryConfiguration.class
+no/mil/fnse/southbound/dao/VtyRouterDAO.class
+no/mil/fnse/southbound/dao/RouterSouthboundDAO.class

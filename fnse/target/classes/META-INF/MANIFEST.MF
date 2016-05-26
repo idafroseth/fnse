@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Implementation-Title: fnse
+Implementation-Title: fnse-core
 Implementation-Version: 0.1.7
 Built-By: Zelus
 Implementation-Vendor-Id: no.mil

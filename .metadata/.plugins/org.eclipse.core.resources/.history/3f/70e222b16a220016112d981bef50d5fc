@@ -1,0 +1,6 @@
+package no.mil.fnse.southbound.model;
+
+public class Addressfamily {
+		private Collection<NetworkInterface>
+
+}

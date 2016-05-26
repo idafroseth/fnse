@@ -1,0 +1,27 @@
+package no.mil.fnse.southbound.model;
+
+public class SubInterface extends NetworkInterface {
+	private Short vlan;
+	private String encapsulation;
+	
+	public SubInterface(){
+		
+	}
+	
+	public Short getVlan() {
+		return vlan;
+	}
+	public void setVlan(Short vlan) {
+		this.vlan = vlan;
+	}
+	public String getEncapsulation() {
+		return encapsulation;
+	}
+	public void setEncapsulation(String encapsulation) {
+		this.encapsulation = encapsulation;
+	}
+	
+	
+	
+
+}

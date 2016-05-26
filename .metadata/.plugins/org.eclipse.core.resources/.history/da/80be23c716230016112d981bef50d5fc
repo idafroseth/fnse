@@ -1,0 +1,15 @@
+package no.mil.fnse.dao;
+
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = no.mil.fnse.configuration.RootConfig.class)
+public class RouterDAO {
+	
+	@Autowired
+	RouterDAO
+	
+
+}

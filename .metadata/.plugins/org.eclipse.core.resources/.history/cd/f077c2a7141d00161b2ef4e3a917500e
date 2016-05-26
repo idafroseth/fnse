@@ -1,0 +1,23 @@
+package no.mil.fnse.dao;
+
+public interface RouterDAO {
+	
+	/**
+	 * Configure a new Peer
+	 * @param peer
+	 * @return
+	 */
+	boolean addNeighbor(Peer neighbor);
+	
+	boolean deleteNeighbor(Peer neighbor);
+	
+	boolean addBGPPeer(BGPConfig bgpConfig);
+	
+	boolean deleteBGPPeer(BGPConfig bgpConfig);
+	
+	boolean addMSDPPeer(MSDPConfig msdpConfig);
+	
+	List<Peer> getAllConfiguredPeer();
+	
+
+}

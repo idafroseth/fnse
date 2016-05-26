@@ -1,0 +1,27 @@
+package no.mil.fnse.dao;
+
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import no.mil.fnse.southbound.model.Router;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = no.mil.fnse.configuration.RootConfig.class)
+public class RouterDAOTest {
+	
+	@Autowired
+	RouterDAO hibernateRouterDAO = null;
+	
+	Router router;
+	
+	@Before 
+	public void init(){
+		router = new Router();
+		router.setManagementIp();
+	}
+	
+
+}

@@ -1,0 +1,15 @@
+package no.mil.fnse.southbound.model;
+
+import java.net.InetAddress;
+
+public class TunnelInterface extends NetworkInterface{
+	private InetAddress tunnelDestination;
+	private InetAddress tunnelSource;
+	
+	public TunnelInterface(){
+		
+	}
+	
+	
+
+}

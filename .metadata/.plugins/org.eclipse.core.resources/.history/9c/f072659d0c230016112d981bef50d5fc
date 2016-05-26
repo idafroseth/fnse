@@ -1,0 +1,88 @@
+package no.mil.fnse.southbound.model;
+
+import java.net.InterfaceAddress;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+import org.apache.log4j.Logger;
+
+public class NetworkInterface {
+	private InterfaceAddress ipAddress;
+	private InterfaceAddress ipv6Address;
+	private String description;
+	private String interfaceName;
+	
+	static Logger logger = Logger.getLogger(NetworkInterface.class);
+	
+	
+	// -------------------------------------------------------------------------
+    // Hashcode and equals
+    // -------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((interfaceName == null) ? 0 : interfaceName.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NetworkInterface other = (NetworkInterface) obj;
+		if (interfaceName == null) {
+			if (other.interfaceName != null)
+				return false;
+		} else if (!interfaceName.equals(other.interfaceName))
+			return false;
+		return true;
+	}
+	
+	// -------------------------------------------------------------------------
+    // Setters and getters
+    // -------------------------------------------------------------------------
+	
+    @Id
+	@GeneratedValue
+	@Column(name = "PEER_ID", unique = true, nullable = false)
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public InterfaceAddress getIpAddress() {
+		return ipAddress;
+	}
+	public void setIpAddress(InterfaceAddress ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+	
+	public InterfaceAddress getIpv6Address() {
+		return ipv6Address;
+	}
+	public void setIpv6Address(InterfaceAddress ipv6Address) {
+		this.ipv6Address = ipv6Address;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getInterfaceName() {
+		return interfaceName;
+	}
+	public void setInterfaceName(String ifName) {
+		this.interfaceName = ifName;
+	}
+	
+}

@@ -1,0 +1,27 @@
+package no.mil.fnse.southbound.model;
+
+import java.util.Collection;
+
+import org.apache.log4j.Logger;
+
+public class GigabitEthernet extends NetworkInterface{
+	
+	private Collection<SubInterface> subinterfaces;
+	private Duplexmode duplexMode;
+	
+	static Logger logger = Logger.getLogger(GigabitEthernet.class);
+	
+	public GigabitEthernet(){
+	}
+
+	public Collection<SubInterface> getSubinterfaces() {
+		return subinterfaces;
+	}
+
+	public void setSubinterfaces(Collection<SubInterface> subinterfaces) {
+		this.subinterfaces = subinterfaces;
+	}
+	
+	
+
+}

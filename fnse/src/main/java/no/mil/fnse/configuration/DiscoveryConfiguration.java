@@ -12,8 +12,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import no.mil.fnse.model.DiscoveryConfig;
-import no.mil.fnse.southbound.model.Router;
+import no.mil.fnse.core.model.DiscoveryConfig;
+import no.mil.fnse.core.service.TelnetCommunication;
+import no.mil.fnse.core.model.Router;
 
 @Configuration
 @ComponentScan("no.mil.fnse")
@@ -69,9 +70,9 @@ public class DiscoveryConfiguration {
 
 	private void connectToNetworkElements() {
 		for (Router router : DISCOVERY_CONFIG.getNetworkElements()) {
-				router.openVty();
-				logger.info("Successful connection to NetworkElement - " + router.getManagementIp());
-			
+			router.setVty(new TelnetCommunication());
+			router.openVty();
+			logger.info("Successful connection to NetworkElement - " + router.getManagementIp());
 		}
 
 	}

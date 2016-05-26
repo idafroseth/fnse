@@ -1,0 +1,10 @@
+package no.mil.fnse.southbound.model;
+
+import com.cisco.onep.location.Location;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public abstract class RouterMixIn {
+	@JsonIgnore 
+	public void setLocation(Location location);
+
+}

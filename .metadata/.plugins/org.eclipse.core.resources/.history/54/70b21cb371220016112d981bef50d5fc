@@ -1,0 +1,77 @@
+package no.mil.fnse.southbound.model;
+
+import java.net.InetAddress;
+
+import org.apache.log4j.Logger;
+
+public class TunnelInterface extends NetworkInterface{
+	private InetAddress tunnelDestination;
+	private InetAddress tunnelSource;
+	
+	static Logger logger = Logger.getLogger(TunnelInterface.class);
+	
+	public TunnelInterface(){
+		
+	}
+
+	
+	// -------------------------------------------------------------------------
+    // Setters and getters
+    // -------------------------------------------------------------------------
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((tunnelDestination == null) ? 0 : tunnelDestination.hashCode());
+		result = prime * result + ((tunnelSource == null) ? 0 : tunnelSource.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TunnelInterface other = (TunnelInterface) obj;
+		if (tunnelDestination == null) {
+			if (other.tunnelDestination != null)
+				return false;
+		} else if (!tunnelDestination.equals(other.tunnelDestination))
+			return false;
+		if (tunnelSource == null) {
+			if (other.tunnelSource != null)
+				return false;
+		} else if (!tunnelSource.equals(other.tunnelSource))
+			return false;
+		return true;
+	}
+
+
+	public InetAddress getTunnelDestination() {
+		return tunnelDestination;
+	}
+
+	public void setTunnelDestination(InetAddress tunnelDestination) {
+		this.tunnelDestination = tunnelDestination;
+	}
+
+	public InetAddress getTunnelSource() {
+		return tunnelSource;
+	}
+
+	public void setTunnelSource(InetAddress tunnelSource) {
+		this.tunnelSource = tunnelSource;
+	}
+	
+	
+	
+	
+	
+	
+
+}

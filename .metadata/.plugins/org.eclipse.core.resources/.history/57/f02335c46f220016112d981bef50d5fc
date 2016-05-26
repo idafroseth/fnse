@@ -1,0 +1,27 @@
+package no.mil.fnse.southbound.model;
+
+import java.util.Collection;
+
+import org.apache.log4j.Logger;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import no.mil.fnse.southbound.model.configuration.*;
+
+public class GlobalConfiguration {
+	private BgpConfig bgpConfig;
+	private NtpConfig ntpConfig;
+	private MsdpConfig msdpConfig;
+	
+	
+	private Collection<Distributelist> distributelists;
+	private Collection<Prefixlist> prefixlist;
+	
+	
+	@JsonIgnore
+	static Logger logger = Logger.getLogger(GlobalConfiguration.class);
+	
+	
+	
+
+}

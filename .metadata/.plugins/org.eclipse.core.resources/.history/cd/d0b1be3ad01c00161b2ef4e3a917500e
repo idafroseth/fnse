@@ -1,0 +1,18 @@
+package no.mil.fnse.service;
+
+import no.mil.fnse.model.Peer;
+
+public interface DiscoveryService {
+
+
+	void discoverdNeighbor(Peer neighbor);
+	
+	/**
+	 * Update the controller with the neighbor
+	 * @param neighbor
+	 */
+	void addNeighborToController(Peer neighbor);
+	
+	
+	 
+}

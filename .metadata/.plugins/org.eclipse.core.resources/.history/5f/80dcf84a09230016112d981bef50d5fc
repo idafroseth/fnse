@@ -1,0 +1,79 @@
+package no.mil.fnse.repository;
+
+import java.net.InetAddress;
+import java.sql.Timestamp;
+import java.util.Collection;
+
+import no.mil.fnse.southbound.Router;
+
+public interface RouterDAO {
+	/**
+	 * Persists a Router. An unique id is generated if the object is persisted
+     * for the first time, and which is both set in the given Router object and
+     * returned.
+	 * @param router
+	 * @return
+	 */
+	int saveRouter(Router router);
+	
+	/**
+	 * Returns a Router identified by the ID
+	 * @param id
+	 * @return the Router or null if it does not exists
+	 */
+	Router getRouter(int id);
+	
+	/**
+	 * Returns the Router with the IP
+	 * @param ip
+	 * @return the Router or null if it does not exists
+	 */
+	Router getRouterByIp(InetAddress local, InetAddress remote);
+	
+	/**
+	 * Returns all the Routers in the database
+	 * @return the collection of all routers or null no one exists
+	 */
+	Collection<Router> getAllRouters();
+	
+	/**
+	 * Returns all the Routers which are assosicaited with a local interface address
+	 * @param localIp
+	 * @return the collection of routers or null if it does not exists
+	 */
+	Collection<Router> getAllRoutersWithLocalIp(InetAddress localIp);
+	
+	/**
+	 * Returns a list of all the routers connected a specific remote neighbor. 
+	 * @param remoteIp
+	 * @return the collection of routers or null if it does not exists
+	 */
+	Collection<Router> getAllRoutersWithRemoteIp(InetAddress remoteIp);
+	
+	/**
+	 * Returns a list of all the routers controlled by a specific controller 
+	 * @param  controller
+	 * @return the collection of routers or null if it does not exists
+	 */
+	Collection<Router> getAllRoutersWithSDNController(SDNController controller);
+	
+	/**
+	 * Returns all the SDNControllers in the database which is dead
+	 * @return
+	 */
+	Collection<Router> getAllDeadRouters(Timestamp time);
+	
+	
+	/**
+	 * Deletes a router
+	 * @param router the router to delete
+	 */
+	void delRouter(Router router);
+	
+	/**
+	 * Updates a router with the correct time and controller
+	 * @param time
+	 * @param controller
+	 */
+	void updateRouter(Router router);
+}

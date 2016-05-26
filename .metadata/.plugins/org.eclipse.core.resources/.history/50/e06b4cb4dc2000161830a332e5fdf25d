@@ -1,0 +1,16 @@
+{
+	"multicast_ip":"239.1.1.1",
+	"port":"5000",
+	"national_ctrl":{
+		"ip":"46.0.0.2",
+		"id":"46",
+		"i":"30"
+	},
+	"network_elements":[
+		"network_element":{
+			"managementIp":"46.0.0.1",
+			"username":"cisco",
+			"password":"cisco"
+		}
+	]
+}

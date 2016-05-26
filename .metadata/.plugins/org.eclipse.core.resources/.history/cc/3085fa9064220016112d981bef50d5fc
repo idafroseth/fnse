@@ -1,0 +1,7 @@
+package no.mil.fnse.southbound.model;
+
+public class GlobalConfiguration {
+	BgpConfig bgpConfig;
+	NtpConfig ntpConfig;
+
+}

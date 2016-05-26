@@ -1,0 +1,9 @@
+package no.mil.fnse.southbound.model;
+
+import java.net.InetAddress;
+
+public class IpNetwork {
+		private String networkAddress;
+		private String netmask;
+
+}

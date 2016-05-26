@@ -1,0 +1,128 @@
+package no.mil.fnse.southbound.model;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+
+import org.apache.commons.net.telnet.TelnetClient;
+import org.apache.log4j.Logger;
+
+public class TelnetSession {
+	
+	private TelnetClient telnetSocket;
+	
+	boolean isconnected = false;
+	
+	final int TELNETPORT = 23;
+	
+    private InputStream in = null; 
+    private PrintStream out = null; 
+	
+	static Logger logger = Logger.getLogger(TelnetSession.class);
+
+
+	public boolean openLine(InetAddress managementIp,  String username, String password) {
+		try {
+			telnetSocket.connect(managementIp, TELNETPORT);
+			telnetSocket.setKeepAlive(true);
+			in = telnetSocket.getInputStream();
+			out = new PrintStream(telnetSocket.getOutputStream());)
+			login(username, password);
+			return true;
+		} catch (IOException e) {
+			logger.error("Attached failed :" +  e);
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public String write(String command){
+		String response ="";
+		try {
+			PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(telnetSocket.getOutputStream())));
+	
+			/* read response */
+			BufferedReader in = new BufferedReader(new InputStreamReader(telnetSocket.getInputStream()));
+	
+			int value = 0;
+	
+			out.println(command);
+			out.flush();
+			
+			while ((value = in.read()) != -1) {
+				response += value;
+			}
+			System.out.println("Response: " + response);
+			return response;
+		} catch (IOException e) {
+			logger.error("Attached failed :" +  e);
+			return null;
+		}
+			
+		
+	}
+	
+	private void login(String username, String password) {
+		try {
+			PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(telnetSocket.getOutputStream())));
+	
+			/* read response */
+			BufferedReader in = new BufferedReader(new InputStreamReader(telnetSocket.getInputStream()));
+	
+			String inputLine;
+	
+			out.println("cisco");
+			out.flush();
+	
+			out.println("cisco");
+			out.flush();
+		
+			while ((inputLine = in.readLine()) != null) {
+				System.out.println(inputLine);
+			}
+			System.out.println("Login succesfull");
+	
+			in.close();
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+    /**
+     * Reads input stream until the given pattern is reached. The  
+     * pattern is discarded and what was read up until the pattern is 
+     * returned. 
+     */ 
+    private String readUntil(String pattern) throws IOException { 
+        char lastChar = pattern.charAt(pattern.length() - 1); 
+        StringBuilder sb = new StringBuilder(); 
+        int c; 
+ 
+        while((c = in.read()) != -1) { 
+            char ch = (char) c; 
+            //System.out.print(ch); 
+            sb.append(ch); 
+            if(ch == lastChar) { 
+                String str = sb.toString(); 
+                if(str.endsWith(pattern)) { 
+                    return str.substring(0, str.length() -  
+                            pattern.length()); 
+                } 
+            } 
+        } 
+ 
+        return null; 
+    } 
+ 
+
+}

@@ -1,0 +1,7 @@
+package no.mil.fnse.controller;
+
+@RestController
+public class AutoconfigurationController {
+	
+
+}

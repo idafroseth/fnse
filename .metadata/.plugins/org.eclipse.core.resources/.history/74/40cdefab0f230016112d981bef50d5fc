@@ -1,0 +1,57 @@
+package no.mil.fnse.repository;
+
+import java.net.InetAddress;
+import java.util.Collection;
+
+import no.mil.fnse.southbound.model.Ntp;
+
+public interface NtpConfigDAO {
+		/**
+		 * Persists a Ntp. An unique id is generated if the object is persisted
+	     * for the first time, and which is both set in the given Ntp object and
+	     * returned.
+		 * @param router
+		 * @return
+		 */
+		int saveNtp(Ntp router);
+		
+		/**
+		 * Returns a Ntp identified by the ID
+		 * @param id
+		 * @return the Ntp or null if it does not exists
+		 */
+		Ntp getNtp(int id);
+		
+		/**
+		 * Returns the Ntp with the IP
+		 * @param ip
+		 * @return the Ntp or null if it does not exists
+		 */
+		Ntp getNtpByManagementIp(InetAddress mangementIp);
+		
+		/**
+		 * Returns all the Ntps in the database
+		 * @return the collection of all routers or null no one exists
+		 */
+		Collection<Ntp> getAllNtps();
+		
+		/**
+		 * Returns all the routers in the database controlled by this controller
+		 * @return collection of routers controlled by this controller
+		 */
+		Collection<Ntp> getAllNationalNtps();
+		
+		
+		/**
+		 * Deletes a router
+		 * @param router the router to delete
+		 */
+		void delNtp(Ntp router);
+		
+		/**
+		 * Updates a router with the correct time and controller
+		 * @param time
+		 * @param controller
+		 */
+		void updateNtp(Ntp router);
+}

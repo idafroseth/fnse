@@ -1,0 +1,6 @@
+package no.mil.fnse.southbound.model.configuration;
+
+public class BgpConfig {
+	
+
+}

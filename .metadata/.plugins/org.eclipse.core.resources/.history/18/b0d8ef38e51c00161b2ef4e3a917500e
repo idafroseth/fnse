@@ -1,0 +1,5 @@
+package no.mil.fnse.model;
+
+public class SDNController {
+
+}
