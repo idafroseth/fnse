@@ -7,10 +7,12 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import no.mil.fnse.core.repository.NtpConfigDAO;
 import no.mil.fnse.core.model.NtpConfig;
 
+@Component("hibernateNtpConfigurationDAO")
 public class HibernateNtpConfigDAO implements NtpConfigDAO {
 	
 	static Logger logger = Logger.getLogger(HibernateNtpConfigDAO.class);

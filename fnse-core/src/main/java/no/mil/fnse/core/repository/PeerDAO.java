@@ -29,7 +29,7 @@ public interface PeerDAO {
 	 * @param ip
 	 * @return the Peer or null if it does not exists
 	 */
-	Peer getPeerByIp(String local, String remote);
+	Peer getPeerByIp(InetAddress local, InetAddress remote);
 	
 	/**
 	 * Returns all the Peers in the database
@@ -67,9 +67,9 @@ public interface PeerDAO {
 	
 	/**
 	 * Deletes a peer
-	 * @param peer the peer to delete
+	 * @param peerId the peer to delete
 	 */
-	void delPeer(Peer peer);
+	void delPeer(Peer peerId);
 	
 	/**
 	 * Updates a peer with the correct time and controller

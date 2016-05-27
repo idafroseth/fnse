@@ -12,8 +12,8 @@
         <!-- Database connection settings -->
        
         <property name="connection.driver_class">org.postgresql.Driver</property>
-        <property name="connection.url">jdbc:postgresql:news_stand</property>
-        <property name="connection.username">admin</property>
+        <property name="connection.url">jdbc:postgresql:fnse</property>
+        <property name="connection.username">zelus</property>
         <property name="connection.password">admin123</property>
 
         <!-- JDBC connection pool (use the built-in) -->

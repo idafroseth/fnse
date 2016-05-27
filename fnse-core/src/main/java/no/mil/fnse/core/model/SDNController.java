@@ -1,7 +1,6 @@
 package no.mil.fnse.core.model;
 
-import java.net.InetAddress;
-import java.util.List;
+import java.util.Collection;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -24,7 +23,7 @@ public class SDNController {
 	private int id;
 
 	@JsonProperty("ip")
-	InetAddress ipAddress;
+	String ipAddress;
 	
 	@JsonProperty("id")
 	int entityId;
@@ -34,7 +33,7 @@ public class SDNController {
 	
 
 	@JsonIgnore
-	List<Peer> peers;
+	Collection<Peer> peers;
 
 	public SDNController(){
 		
@@ -90,10 +89,10 @@ public class SDNController {
 
 	@Basic(optional = false)
 	@Column(name = "CONTROLLER_IP", unique = true, nullable = false)
-	public InetAddress getIpAddress() {
+	public String getIpAddress() {
 		return ipAddress;
 	}
-	public void setIpAddress(InetAddress ipAddress) {
+	public void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 	
@@ -114,10 +113,10 @@ public class SDNController {
 	}
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "controller")
-	public List<Peer> getPeers() {
+	public Collection<Peer> getPeers() {
 		return peers;
 	}
-	public void setPeers(List<Peer> peers) {
+	public void setPeers(Collection<Peer> peers) {
 		this.peers = peers;
 	}
 	

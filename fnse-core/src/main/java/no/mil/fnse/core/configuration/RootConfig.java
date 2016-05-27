@@ -1,7 +1,5 @@
 package no.mil.fnse.core.configuration;
 
-
-
 import java.beans.PropertyVetoException;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -15,33 +13,34 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import no.mil.fnse.core.model.Peer;
-import no.mil.fnse.core.model.SDNController;
+import no.mil.fnse.core.model.*;
 
 import org.springframework.context.annotation.Configuration;
 
-
 //beans are typically the middle-tier and data-tier components that drive the back end of the application
 @Configuration
-@ComponentScan(basePackages={"no.mil.fnse","no.mil.fnse.repository","no.mil.fnse.service"})
+@ComponentScan(basePackages = { "no.mil.fnse", "no.mil.fnse.repository", "no.mil.fnse.service" })
 @EnableTransactionManagement
-public  class RootConfig  implements SchedulingConfigurer{
+public class RootConfig implements SchedulingConfigurer {
 	static Logger logger = Logger.getLogger(RootConfig.class);
+
 	@Bean
 	public LocalSessionFactoryBean sessionFactory(ComboPooledDataSource dataSource) {
 		LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
 		sessionFactory.setDataSource(dataSource);
-	//	 ((Object) sessionFactory).setPackagesToScan(new String[]{"no.cyfor.zelus.news_stand.dao.hibernate"});
-		sessionFactory.setAnnotatedPackages(new String[] { "no.mil.fnse"});
-		sessionFactory.setAnnotatedClasses(new Class[] {SDNController.class, Peer.class});
-		//sessionFactory.setMappingResources(;//, "model.KeyWord", "model.Search", "model.Publisher" });
+		// ((Object) sessionFactory).setPackagesToScan(new
+		// String[]{"no.cyfor.zelus.news_stand.dao.hibernate"});
+		sessionFactory.setAnnotatedPackages(new String[] { "no.mil.fnse" });
+		sessionFactory.setAnnotatedClasses(new Class[] { SDNController.class, Peer.class, BgpConfig.class,SystemConfiguration.class,
+				GlobalConfiguration.class, MsdpConfig.class, NetworkInterface.class, NtpConfig.class, Router.class});
+		// sessionFactory.setMappingResources(;//, "model.KeyWord",
+		// "model.Search", "model.Publisher" });
 		sessionFactory.setHibernateProperties(hibernateProperties());
 		logger.info("SessionFatory: " + sessionFactory);
 		return sessionFactory;
@@ -76,6 +75,7 @@ public  class RootConfig  implements SchedulingConfigurer{
 		return new PersistenceExceptionTranslationPostProcessor();
 	}
 
+	@SuppressWarnings("serial")
 	private Properties hibernateProperties() {
 		return new Properties() {
 			{
@@ -91,8 +91,8 @@ public  class RootConfig  implements SchedulingConfigurer{
 		taskRegistrar.setScheduler(taskExecutor());
 	}
 
-    @Bean(destroyMethod="shutdown")
-    public Executor taskExecutor() {
-        return Executors.newScheduledThreadPool(10);
-    }
+	@Bean(destroyMethod = "shutdown")
+	public Executor taskExecutor() {
+		return Executors.newScheduledThreadPool(10);
+	}
 }

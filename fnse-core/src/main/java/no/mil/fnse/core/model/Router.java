@@ -1,10 +1,13 @@
 package no.mil.fnse.core.model;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -39,6 +42,9 @@ public class Router {
 	private GlobalConfiguration globalConfiguration;
 
 	private List<NetworkInterface> networkInterfaces;
+	
+	private boolean national;
+	
 	
 	@JsonIgnore
 	private ExternalCommunication vty;
@@ -148,7 +154,7 @@ public class Router {
 	}
 	
 	@OneToOne
-	@JoinColumn(name = "ROUTER_ID")
+	@JoinColumn(name = "GLOBAL_CONFIG")
 	public GlobalConfiguration getGlobalConfiguration() {
 		return globalConfiguration;
 	}
@@ -157,8 +163,7 @@ public class Router {
 		this.globalConfiguration = globalConfiguration;
 	}
 
-	@OneToMany
-	@JoinColumn(name ="NETWORINTERFACE_ID")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "router")
 	public List<NetworkInterface> getNetworkInterfaces() {
 		return networkInterfaces;
 	}
@@ -166,6 +171,16 @@ public class Router {
 	public void setNetworkInterfaces(List<NetworkInterface> networkInterfaces) {
 		this.networkInterfaces = networkInterfaces;
 	}
+
+	@Column(name="ROUTER_NATIONAL")
+	public boolean isNational() {
+		return national;
+	}
+
+	public void setNational(boolean national) {
+		this.national = national;
+	}
+
 	
 	
 

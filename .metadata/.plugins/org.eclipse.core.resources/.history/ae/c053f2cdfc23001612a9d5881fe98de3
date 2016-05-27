@@ -1,0 +1,142 @@
+package no.mil.fnse.configuration;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.MulticastSocket;
+import java.util.Collection;
+import javax.transaction.Transactional;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import no.mil.fnse.core.model.BgpConfig;
+import no.mil.fnse.core.model.DiscoveryConfig;
+import no.mil.fnse.core.model.GlobalConfiguration;
+import no.mil.fnse.core.model.NetworkInterface;
+import no.mil.fnse.core.service.RepositoryService;
+import no.mil.fnse.core.service.TelnetCommunication;
+import no.mil.fnse.core.southbound.VtyRouterDAO;
+import no.mil.fnse.core.model.Router;
+
+@Configuration
+@ComponentScan("no.mil.fnse")
+@Transactional
+public class DiscoveryConfiguration {
+
+	static Logger logger = Logger.getLogger(DiscoveryConfiguration.class);
+
+	public static DiscoveryConfig DISCOVERY_CONFIG = new DiscoveryConfig();
+	public static String HELLO_MSG;
+	public static MulticastSocket SERVER_SOCKET;
+	public static MulticastSocket CLIENT_SOCKET;
+	public static DatagramPacket HELLO_PACKET;
+
+	private final int TTL = 10;
+
+	private boolean hasRun = false;
+
+	@Autowired
+	VtyRouterDAO vtyRouterDAO;
+
+	@Autowired
+	RepositoryService repoService;
+
+	/**
+	 * Read the config.json file and configuring the basic values as Hello
+	 * interval,
+	 */
+	@Scheduled(fixedRate = 3600000)
+	public void configure() {
+		if (!hasRun) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				DISCOVERY_CONFIG = mapper.readValue(new File(System.getProperty("user.dir") + "/config.json"),
+						DiscoveryConfig.class);
+				// Generate hello message from config
+				HELLO_MSG = mapper.writeValueAsString(DISCOVERY_CONFIG.getNATIONAL_CONTROLLER());
+				// Setup a socket to listen and send packages to/from
+				// The server sender port in the HELLO_PACKET should be the same
+				// as the listener
+				CLIENT_SOCKET = new MulticastSocket(DISCOVERY_CONFIG.getPORT());
+				SERVER_SOCKET = new MulticastSocket(0);
+				SERVER_SOCKET.setTimeToLive(TTL);
+
+				// Join group is only nessecary for the listener. Should be sent
+				// regulary..
+				CLIENT_SOCKET.joinGroup(DISCOVERY_CONFIG.getMULTICAST_GROUP());
+				HELLO_PACKET = new DatagramPacket(HELLO_MSG.getBytes(), HELLO_MSG.getBytes().length,
+						DISCOVERY_CONFIG.getMULTICAST_GROUP(), DISCOVERY_CONFIG.getPORT());
+			
+				connectToNetworkElements();
+				
+				persistRouters();
+			
+				fetchConfigurationFromNetworkElement();
+
+			} catch (IOException e) {
+				logger.error("Attached failed: " + e);
+			}
+			hasRun = true;
+		}
+
+	}
+
+	private void persistRouters() {
+		for (Router router : DISCOVERY_CONFIG.getNetworkElements()) {
+			router.setNational(true);
+			repoService.addRouter(router);
+		}
+
+	}
+
+	private void connectToNetworkElements() {
+		for (Router router : DISCOVERY_CONFIG.getNetworkElements()) {
+			router.setVty(new TelnetCommunication());
+			router.openVty();
+			logger.info("Successful connection to NetworkElement - " + router.getManagementIp());
+		}
+
+	}
+
+	private void fetchConfigurationFromNetworkElement() {
+
+
+		for (Router router : DISCOVERY_CONFIG.getNetworkElements()) {
+			/*
+			 * 0) get from network element and persist Interface config 
+			 * 1) get
+			 * from network element and persist BGP config
+			 */
+			Collection<NetworkInterface> neList = vtyRouterDAO.getNetworkInterfaces(router);
+			for(NetworkInterface ne : neList){
+				int neId = repoService.addNetworkInterface(ne);
+				repoService.addNetworkInterfaceToRouter( router.getId(), neId);
+			}
+			
+			BgpConfig bgpConfig = vtyRouterDAO.getBgpConfig(router);
+			repoService.addBgpConfiguration(bgpConfig);
+
+			/*
+			 * 2) get and persist NTP config 
+			 * 3) get and persist MSDP config
+			 * 4) Construct and persist globalconfig
+			 */
+			GlobalConfiguration global = new GlobalConfiguration();
+			global.setName(router.getManagementIp() + "");
+			global.setBgpConfig(bgpConfig);
+			int globalConfigId = repoService.addGlobalConfiguration(global);
+			
+			 // 5) Add global config to Router
+			repoService.addGlobalConfigurationToRouter(globalConfigId, router.getId());
+
+		}
+
+	}
+
+}

@@ -1,6 +1,5 @@
 package no.mil.fnse.core.repository;
 
-import java.net.InetAddress;
 import java.util.Collection;
 
 import no.mil.fnse.core.model.SDNController;
@@ -27,7 +26,7 @@ public interface SDNControllerDAO {
 	 * @param ip
 	 * @return the SDNController or null if it does not exists
 	 */
-	SDNController getSDNControllerByIp(InetAddress ip);
+	SDNController getSDNControllerByIp(String ip);
 	
 	/**
 	 * Returns all the SDNControllers in the database

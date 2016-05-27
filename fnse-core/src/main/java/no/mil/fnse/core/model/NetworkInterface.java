@@ -1,11 +1,14 @@
 package no.mil.fnse.core.model;
 
-import java.net.InterfaceAddress;
+import java.net.InetAddress;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -19,10 +22,12 @@ import org.apache.log4j.Logger;
 @Table(name="networkinterface")
 public class NetworkInterface {
 	private int id;
-	private InterfaceAddress ipAddress;
-	private InterfaceAddress ipv6Address;
+	private InetAddress ipAddress;
+	private InetAddress ipv6Address;
 	private String description;
 	private String interfaceName;
+	
+	private Router router;
 	
 	static Logger logger = Logger.getLogger(NetworkInterface.class);
 	
@@ -76,27 +81,37 @@ public class NetworkInterface {
 		this.interfaceName = ifName;
 	}
 	
-	@Transient
-	public InterfaceAddress getIpAddress() {
+	@Column(name="IP4_ADR")
+	public InetAddress getIpAddress() {
 		return ipAddress;
 	}
-	public void setIpAddress(InterfaceAddress ipAddress) {
+	public void setIpAddress(InetAddress ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 	
 	@Transient
-	public InterfaceAddress getIpv6Address() {
+	public InetAddress getIpv6Address() {
 		return ipv6Address;
 	}
-	public void setIpv6Address(InterfaceAddress ipv6Address) {
+	public void setIpv6Address(InetAddress ipv6Address) {
 		this.ipv6Address = ipv6Address;
 	}
+	
 	@Column(name = "NE_DESCRIPTION")
 	public String getDescription() {
 		return description;
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "ROUTER_ID", nullable = false)
+	public Router getRouter() {
+		return router;
+	}
+	public void setRouter(Router router) {
+		this.router = router;
 	}
 
 	

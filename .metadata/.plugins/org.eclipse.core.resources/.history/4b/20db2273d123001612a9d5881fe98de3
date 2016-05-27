@@ -1,0 +1,82 @@
+package no.mil.fnse.core.service;
+
+
+import java.sql.Timestamp;
+import java.util.Collection;
+
+import no.mil.fnse.core.model.BgpConfig;
+import no.mil.fnse.core.model.GlobalConfiguration;
+import no.mil.fnse.core.model.NetworkInterface;
+import no.mil.fnse.core.model.Peer;
+import no.mil.fnse.core.model.Router;
+import no.mil.fnse.core.model.SDNController;
+import no.mil.fnse.core.model.values.PeerStatus;
+
+
+public interface RepositoryService {
+	
+	int addPeer(Peer peer);
+	
+	void delPeer(int PeerId);
+	
+	void updatePeer(int PeerId, Timestamp deadTime, PeerStatus status );
+	
+	Peer getPeerByIp(String localIp, String remoteIp);
+	
+	int addSdnController(SDNController ctrl);
+	
+	void addPeerToSdnController(int peerId, int  ctrlId); 
+
+	SDNController getSdnController(int ctrlId);
+	
+	void removePeerFromSdnController(int peerId, int sdnCtrlId);
+	
+	Collection<Router> getAllNationalRouters();
+	
+	int addRouter(Router router);
+	
+	/**
+	 * Returns the parent router connecting the remote peer
+	 * 
+	 */
+	Router getRouterByRemotePeer(int peerId);
+	
+	void addRemotePeerToRouter(int routerId, int peerId);
+	
+	void removeRemotePeerFromRouter(int routerId, int peerId);
+	
+	void delRouter(int routerId);
+	
+	void addGlobalConfigurationToRouter(int globalConfigId, int routerId);
+	
+	int addGlobalConfiguration(GlobalConfiguration global);
+	
+	void delGlobalConfiguration(int globalconfId);
+	
+	int addBgpConfiguration(BgpConfig bgpConfig);
+	
+	void delBgpConfiguration(int bgpConfigId);
+	
+	BgpConfig getBgpConfiguration(int bggConfigId);
+	
+	void addBgpToGlobalConfiguration(int globalConfigurationId, int bgpConfigId);
+	
+	void removeBgpfromGlobalConfiguration(int globalConfigurationId, int bgpConfigId);
+	
+	void addMsdpToGlobalConfiguration(int globalConfigurationId, int msdpConfigId);
+	
+	void removeMsdpfromGlobalConfiguration(int globalConfigurationId, int msdpConfigId);
+	
+	void addNtpToGlobalConfiguration(int globalConfigurationId, int ntpConfigId);
+	
+	void removeNtpfromGlobalConfiguration(int globalConfigurationId, int ntpConfigId);
+	
+	int addNetworkInterface(NetworkInterface ne);
+	
+	void delNetworkInterface(int neId);
+	
+	
+	
+	
+	
+}

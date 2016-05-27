@@ -1,0 +1,5 @@
+Java spring boot with web app only run once
+
+install:
+
+sudo apt-get install haveged -y

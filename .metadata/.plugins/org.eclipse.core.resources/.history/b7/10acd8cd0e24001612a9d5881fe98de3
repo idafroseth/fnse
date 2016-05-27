@@ -1,0 +1,6 @@
+package no.mil.fnse.discovery.service;
+
+public class PacketQueue<E> {
+
+	
+}

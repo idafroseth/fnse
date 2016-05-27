@@ -1,0 +1,11 @@
+package no.mil.fnse.core.repository.hibernate;
+
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Component;
+
+@Transactional
+@Component("hibernateSystemConfigurationDAO")
+public class hibernateSystemConfigurationDAO implements SystemConfigurationDAO {
+
+}

@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="no.mil.fnse.model.DiscoveryConfig"/>
-<fullyQualifiedTypeName name="com.mchange.v2.c3p0.ComboPooledDataSource"/>
-<fullyQualifiedTypeName name="javax.persistence.Id"/>
-<fullyQualifiedTypeName name="javax.persistence.GeneratedValue"/>
-<fullyQualifiedTypeName name="javax.persistence.Column"/>
-<fullyQualifiedTypeName name="javax.persistence.OneToMany"/>
-<fullyQualifiedTypeName name="javax.persistence.JoinColumn"/>
-<fullyQualifiedTypeName name="javax.persistence.FetchType"/>
-<fullyQualifiedTypeName name="javax.persistence.ManyToOne"/>
-<fullyQualifiedTypeName name="javax.persistence.Basic"/>
-<fullyQualifiedTypeName name="javax.persistence.Entity"/>
-<fullyQualifiedTypeName name="javax.persistence.Table"/>
 <fullyQualifiedTypeName name="java.io.Serializable"/>
 <fullyQualifiedTypeName name="org.springframework.orm.hibernate4.LocalSessionFactoryBean"/>
 <fullyQualifiedTypeName name="org.springframework.scheduling.annotation.EnableScheduling"/>
@@ -30,7 +18,6 @@
 <fullyQualifiedTypeName name="no.mil.fnse.repository.ControllerDAO"/>
 <fullyQualifiedTypeName name="no.mil.fnse.repository.PeerDAO"/>
 <fullyQualifiedTypeName name="org.springframework.transaction.annotation.EnableTransactionManagement"/>
-<fullyQualifiedTypeName name="javax.transaction.Transactional"/>
 <fullyQualifiedTypeName name="org.springframework.stereotype.Service"/>
 <fullyQualifiedTypeName name="javax.persistence.CascadeType"/>
 <fullyQualifiedTypeName name="no.mil.fnse.model.Controller"/>
@@ -43,17 +30,34 @@
 <fullyQualifiedTypeName name="no.mil.fnse.southbound.model.MulticastRoute"/>
 <fullyQualifiedTypeName name="no.mil.fnse.southbound.model.BGPPeer"/>
 <fullyQualifiedTypeName name="no.mil.fnse.configuration.DiscoveryConfiguration"/>
-<fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="no.mil.fnse.southbound.model.Router"/>
 <fullyQualifiedTypeName name="no.mil.fnse.southbound.dao.RouterDAO"/>
 <fullyQualifiedTypeName name="org.springframework.stereotype.Component"/>
-<fullyQualifiedTypeName name="java.net.InetAddress"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonIgnoreProperties"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonFilter"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.databind.ser.FilterProvider"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter"/>
-<fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonIgnore"/>
 <fullyQualifiedTypeName name="com.cisco.onep.location.Location"/>
 <fullyQualifiedTypeName name="com.cisco.onep.element.NetworkElement"/>
+<fullyQualifiedTypeName name="java.util.HashSet"/>
+<fullyQualifiedTypeName name="java.util.Collection"/>
+<fullyQualifiedTypeName name="org.hibernate.mapping.Set"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.model.GigabitEthernet"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.model.Router"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.repository.NetworkInterfaceDAO"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.model.NetworkInterface"/>
+<fullyQualifiedTypeName name="javax.transaction.Transactional"/>
+<fullyQualifiedTypeName name="java.net.InetAddress"/>
+<fullyQualifiedTypeName name="javax.persistence.ManyToOne"/>
+<fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonIgnore"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.repository.SystemConfigurationDAO"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.model.SystemConfiguration"/>
+<fullyQualifiedTypeName name="no.mil.fnse.configuration.DiscoveryConfig"/>
+<fullyQualifiedTypeName name="no.mil.fnse.core.service.RepositoryService"/>
+<fullyQualifiedTypeName name="no.mil.fnse.configuration.DatabaseInitialization"/>
+<fullyQualifiedTypeName name="java.util.Queue"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="java.util.LinkedList"/>
 </qualifiedTypeNameHistroy>

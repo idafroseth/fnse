@@ -2,22 +2,25 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="connect(" key="selection"/>
-		<item value="false" key="casesensitive"/>
+		<item value="updatePeer" key="selection"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="connect("/>
-			<item value="pinning"/>
-			<item value="File"/>
-			<item value="pinng"/>
-			<item value="connect"/>
-			<item value="TLSPinningHandler"/>
-			<item value="TLSPinning"/>
-			<item value="getSession"/>
+			<item value="updatePeer"/>
+			<item value="update"/>
+			<item value="controller"/>
+			<item value="SDNController"/>
+			<item value="sDNController"/>
+			<item value="getPeerByIp"/>
+			<item value="bgp"/>
+			<item value="To"/>
 		</list>
 		<list key="replacehistory">
+			<item value="SystemConfiguration"/>
+			<item value="systemConfiguration"/>
+			<item value=""/>
 			<item value="managementIp"/>
 			<item value="Logger.getLogger"/>
 			<item value="logger"/>

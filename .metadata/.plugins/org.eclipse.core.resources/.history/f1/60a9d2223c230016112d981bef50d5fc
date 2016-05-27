@@ -1,0 +1,61 @@
+package no.mil.fnse.core.service;
+
+
+import no.mil.fnse.core.model.BgpConfig;
+import no.mil.fnse.core.model.GlobalConfiguration;
+import no.mil.fnse.core.model.NetworkInterface;
+import no.mil.fnse.core.model.Peer;
+import no.mil.fnse.core.model.Router;
+import no.mil.fnse.core.model.SDNController;
+import no.mil.fnse.core.model.values.PeerStatus;
+
+
+public interface RepositoryService {
+	
+	int addPeer(Peer peer);
+	
+	void delPeer(int PeerId);
+	
+	void updatePeer(int PeerId, int deadTime, PeerStatus status );
+	
+	int addSdnController(SDNController ctrl);
+	
+	void addPeerToSdnController(SDNController ctrl, Peer peer); 
+
+	int addRouter(Router router);
+	
+	void delRouter(int routerId);
+	
+	void addGlobalConfigurationToRouter(GlobalConfiguration globalConfig);
+	
+	int addGlobalConfiguration(GlobalConfiguration global);
+	
+	void delGlobalConfiguration(int globalconfId);
+	
+	int addBgpConfiguration(BgpConfig bgpConfig);
+	
+	void delBgpConfiguration(int bgpConfigId);
+	
+	BgpConfig getBgpConfiguration(int bggConfigId);
+	
+	void addBgpToGlobalConfiguration(int globalConfigurationId, int bgpConfigId);
+	
+	void removeBgpfromGlobalConfiguration(int globalConfigurationId, int bgpConfigId);
+	
+	void addMsdpToGlobalConfiguration(int globalConfigurationId, int msdpConfigId);
+	
+	void removeMsdpfromGlobalConfiguration(int globalConfigurationId, int msdpConfigId);
+	
+	void addNtpToGlobalConfiguration(int globalConfigurationId, int ntpConfigId);
+	
+	void removeNtpfromGlobalConfiguration(int globalConfigurationId, int ntpConfigId);
+	
+	int addNetworkInterface(NetworkInterface ne);
+	
+	void delNetworkInterface(int neId);
+	
+	
+	
+	
+	
+}

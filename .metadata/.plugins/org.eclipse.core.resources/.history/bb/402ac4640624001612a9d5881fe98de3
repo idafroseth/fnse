@@ -1,0 +1,5 @@
+package no.mil.fnse.core.repository.hibernate;
+
+public class hibernateSystemConfigurationDAO implements SystemConfigurationDAO {
+
+}

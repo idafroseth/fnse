@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.Router;
 import no.mil.fnse.core.repository.RouterDAO;
 
@@ -44,8 +45,14 @@ public class HibernateRouterDAO implements RouterDAO {
 
 	
 	public Collection<Router> getAllNationalRouters() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Router.class);
+			criteria.add(Restrictions.eq("national", true));
+			return (Collection<Router>) criteria.list();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
 	public Router getRouter(int id) {
@@ -77,8 +84,8 @@ public class HibernateRouterDAO implements RouterDAO {
 			return null;
 		}
 	}
-
-	public void delRouter(Router router) {
+	
+	public void delRouter(int router) {
 		try {
 			sessionFactory.getCurrentSession().delete(router);
 		} catch (RuntimeException re) {
@@ -103,4 +110,5 @@ public class HibernateRouterDAO implements RouterDAO {
 		}
 		
 	}
+
 }

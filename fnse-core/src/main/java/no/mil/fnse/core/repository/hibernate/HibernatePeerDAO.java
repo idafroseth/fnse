@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import no.mil.fnse.core.model.Peer;
+import no.mil.fnse.core.model.Router;
 import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.repository.PeerDAO;
 
@@ -49,11 +50,15 @@ public class HibernatePeerDAO implements PeerDAO{
 	}
 
 	public Peer getPeer(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return (Peer) sessionFactory.getCurrentSession().get(Peer.class, id);
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			return null;
+		}
 	}
 
-	public Peer getPeerByIp(String local, String remote) {
+	public Peer getPeerByIp(InetAddress local, InetAddress remote) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
 			criteria.add(Restrictions.eq("remoteInterfaceIp", remote));
@@ -110,6 +115,9 @@ public class HibernatePeerDAO implements PeerDAO{
 
 	public void delPeer(Peer peer) {
 		try {
+			if (peer == null) {
+				logger.error("The deleted peer did not exist");
+			}
 			sessionFactory.getCurrentSession().delete(peer);
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
@@ -119,7 +127,6 @@ public class HibernatePeerDAO implements PeerDAO{
 	public void updatePeer(Peer peer) {
 		try{
 			Peer peerToChange = getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp());
-			peerToChange.setController(peer.getController());
 			peerToChange.setDeadTime(peer.getDeadTime());
 			peerToChange.setStatus(peer.getStatus());
 			sessionFactory.getCurrentSession().update(peerToChange);

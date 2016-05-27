@@ -1,6 +1,5 @@
 package no.mil.fnse.core.repository.hibernate;
 
-import java.net.InetAddress;
 import java.util.Collection;
 
 import javax.transaction.Transactional;
@@ -58,7 +57,7 @@ public class HibernateSDNControllerDAO implements SDNControllerDAO{
 	}
 
 	@Transactional
-	public SDNController getSDNControllerByIp(InetAddress ip) {
+	public SDNController getSDNControllerByIp(String ip) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(SDNController.class);
 			criteria.add(Restrictions.eq("ipAddress", ip));

@@ -99,7 +99,7 @@ public class BgpConfig {
 	}
 
 	@OneToMany
-	@JoinColumn(name ="BGPCONFIG_ID")
+	@JoinColumn(name ="parent")
 	public Collection<BgpConfig> getNeighbors() {
 		return neighbors;
 	}
