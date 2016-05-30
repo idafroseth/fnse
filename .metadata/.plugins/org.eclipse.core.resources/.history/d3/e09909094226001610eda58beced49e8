@@ -1,0 +1,11 @@
+package no.mil.fnse.configuration;
+
+import no.mil.fnse.core.model.NtpConfig;
+
+public class SystemWideConfiguration {
+
+	SipConfig sip;
+	NtpConfig ntp;
+	DnsConfig dns;
+	
+}

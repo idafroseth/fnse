@@ -14,6 +14,8 @@ import javax.persistence.OneToOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.mil.fnse.core.model.networkElement.Router;
+
 public class SystemConfiguration {
 	
 	@JsonIgnore

@@ -10,8 +10,8 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.mil.fnse.core.model.NetworkInterface;
 import no.mil.fnse.core.model.Peer;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.repository.NetworkInterfaceDAO;
 
 @Component("hibernateNetworkInterfaceDAO")

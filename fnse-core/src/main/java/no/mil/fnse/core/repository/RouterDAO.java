@@ -3,7 +3,7 @@ package no.mil.fnse.core.repository;
 import java.net.InetAddress;
 import java.util.Collection;
 
-import no.mil.fnse.core.model.Router;
+import no.mil.fnse.core.model.networkElement.Router;
 
 public interface RouterDAO {
 	/**

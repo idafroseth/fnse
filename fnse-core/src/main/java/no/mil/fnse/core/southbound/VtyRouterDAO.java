@@ -11,10 +11,10 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import no.mil.fnse.core.model.BgpConfig;
-import no.mil.fnse.core.model.BgpPeer;
-import no.mil.fnse.core.model.NetworkInterface;
-import no.mil.fnse.core.model.Router;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
+import no.mil.fnse.core.model.networkElement.BgpPeer;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.southbound.RouterSouthboundDAO;
 
 @Component("vtyRouterDAO")

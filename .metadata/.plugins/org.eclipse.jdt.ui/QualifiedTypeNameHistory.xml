@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.io.Serializable"/>
-<fullyQualifiedTypeName name="org.springframework.orm.hibernate4.LocalSessionFactoryBean"/>
-<fullyQualifiedTypeName name="org.springframework.scheduling.annotation.EnableScheduling"/>
-<fullyQualifiedTypeName name="org.springframework.scheduling.annotation.SchedulingConfigurer"/>
 <fullyQualifiedTypeName name="java.util.concurrent.Executor"/>
 <fullyQualifiedTypeName name="java.util.concurrent.Executors"/>
 <fullyQualifiedTypeName name="org.slf4j.Logger"/>
@@ -32,7 +28,6 @@
 <fullyQualifiedTypeName name="no.mil.fnse.configuration.DiscoveryConfiguration"/>
 <fullyQualifiedTypeName name="no.mil.fnse.southbound.model.Router"/>
 <fullyQualifiedTypeName name="no.mil.fnse.southbound.dao.RouterDAO"/>
-<fullyQualifiedTypeName name="org.springframework.stereotype.Component"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonIgnoreProperties"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonFilter"/>
 <fullyQualifiedTypeName name="com.fasterxml.jackson.databind.ser.FilterProvider"/>
@@ -60,4 +55,9 @@
 <fullyQualifiedTypeName name="java.util.Queue"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="java.util.LinkedList"/>
+<fullyQualifiedTypeName name="org.springframework.scheduling.annotation.EnableAsync"/>
+<fullyQualifiedTypeName name="org.springframework.scheduling.annotation.Async"/>
+<fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Value"/>
+<fullyQualifiedTypeName name="org.springframework.stereotype.Component"/>
+<fullyQualifiedTypeName name="org.springframework.boot.autoconfigure.condition.ConditionalOnProperty"/>
 </qualifiedTypeNameHistroy>

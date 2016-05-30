@@ -3,10 +3,10 @@ package no.mil.fnse.core.southbound;
 import java.net.InetAddress;
 import java.util.Collection;
 
-import no.mil.fnse.core.model.BgpConfig;
-import no.mil.fnse.core.model.BgpPeer;
-import no.mil.fnse.core.model.NetworkInterface;
-import no.mil.fnse.core.model.Router;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
+import no.mil.fnse.core.model.networkElement.BgpPeer;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 
 public  interface RouterSouthboundDAO {
 

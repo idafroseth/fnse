@@ -2,7 +2,7 @@ package no.mil.fnse.core.repository;
 
 import java.util.Collection;
 
-import no.mil.fnse.core.model.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 
 public interface GlobalConfigurationDAO {
 	/**

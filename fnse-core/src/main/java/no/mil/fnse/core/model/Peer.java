@@ -14,7 +14,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.mil.fnse.core.model.networkElement.TunnelInterface;
 import no.mil.fnse.core.model.values.PeerStatus;
 
 /**
@@ -35,11 +37,17 @@ public class Peer implements Serializable{
 	
 	private InetAddress remoteInterfaceIp;
 	
+	@JsonIgnore
 	private Timestamp deadTime;
 	
+	@JsonIgnore
 	private PeerStatus status;
 	
+	@JsonIgnore
 	private SDNController controller;
+	
+	@JsonProperty("gre_tunnel")
+	private TunnelInterface greTunnel;
 
 	
 	public Peer(){
@@ -134,6 +142,15 @@ public class Peer implements Serializable{
 	}
 	public void setController(SDNController controller) {
 		this.controller = controller;
+	}
+	
+	@Column(name = "PEER_GRE_TUNNEL")
+	public TunnelInterface getGreTunnel() {
+		return greTunnel;
+	}
+	
+	public void setGreTunnel(TunnelInterface greTunnel) {
+		this.greTunnel = greTunnel;
 	}
 	
 	

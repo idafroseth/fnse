@@ -4,13 +4,13 @@ import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.Collection;
 
-import no.mil.fnse.core.model.BgpConfig;
-import no.mil.fnse.core.model.GlobalConfiguration;
-import no.mil.fnse.core.model.NetworkInterface;
 import no.mil.fnse.core.model.Peer;
-import no.mil.fnse.core.model.Router;
 import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.model.SystemConfiguration;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
+import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.model.values.PeerStatus;
 
 public interface RepositoryService {

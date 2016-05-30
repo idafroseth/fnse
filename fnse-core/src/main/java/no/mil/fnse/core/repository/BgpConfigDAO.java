@@ -3,7 +3,7 @@ package no.mil.fnse.core.repository;
 
 import java.util.Collection;
 
-import no.mil.fnse.core.model.BgpConfig;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
 
 public interface BgpConfigDAO {
 	/**

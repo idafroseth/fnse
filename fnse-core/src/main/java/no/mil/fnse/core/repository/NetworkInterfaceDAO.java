@@ -3,7 +3,7 @@ package no.mil.fnse.core.repository;
 import java.net.InetAddress;
 import java.util.Collection;
 
-import no.mil.fnse.core.model.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
 
 public interface NetworkInterfaceDAO {
 	/**

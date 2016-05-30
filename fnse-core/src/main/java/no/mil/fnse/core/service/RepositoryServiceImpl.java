@@ -16,13 +16,13 @@ import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.mil.fnse.core.model.BgpConfig;
-import no.mil.fnse.core.model.GlobalConfiguration;
-import no.mil.fnse.core.model.NetworkInterface;
 import no.mil.fnse.core.model.Peer;
-import no.mil.fnse.core.model.Router;
 import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.model.SystemConfiguration;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
+import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.model.values.PeerStatus;
 import no.mil.fnse.core.repository.BgpConfigDAO;
 import no.mil.fnse.core.repository.GlobalConfigurationDAO;

@@ -1,0 +1,5 @@
+package no.mil.fnse.autoconfiguration.model;
+
+public class GreConfiguration {
+
+}

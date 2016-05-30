@@ -1,0 +1,6 @@
+package no.mil.fnse.autoconfiguration.model;
+
+public class LocalConfiguration {
+
+	BgpConfig bgpConfig;
+}

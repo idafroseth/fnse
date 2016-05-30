@@ -8,16 +8,17 @@ import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.mil.fnse.core.model.SystemConfiguration;
-import no.mil.fnse.core.model.BgpConfig;
-import no.mil.fnse.core.model.GlobalConfiguration;
-import no.mil.fnse.core.model.NetworkInterface;
-import no.mil.fnse.core.model.Router;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
+import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.service.RepositoryService;
 import no.mil.fnse.core.service.TelnetCommunication;
 import no.mil.fnse.core.southbound.VtyRouterDAO;
@@ -32,6 +33,10 @@ public class DatabaseInitialization {
 	@Autowired
 	VtyRouterDAO vtyRouterDAO;
 	
+	@Autowired
+	Status configurationStatus;
+	
+	@Value("databaseReady")
 	public static boolean databaseReady = false;
 	
 	static Logger logger = Logger.getLogger(DatabaseInitialization.class);
@@ -58,6 +63,7 @@ public class DatabaseInitialization {
 				defaultreposervice.addSystemConfiguration(systemconfig);
 			
 				fetchConfigurationFromNetworkElement();
+				configurationStatus.setDatabaseIsConfigured(true);
 
 			} catch (IOException e) {
 				logger.error("Attached failed: " + e);

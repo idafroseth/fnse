@@ -20,6 +20,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import no.mil.fnse.core.model.*;
+import no.mil.fnse.core.model.networkElement.BgpConfig;
+import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.MsdpConfig;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 
 import org.springframework.context.annotation.Configuration;
 

@@ -1,0 +1,12 @@
+package no.mil.fnse.autoconfiguration.model;
+
+public class LocalConfiguration {
+
+	@JsonIgnore
+	Peer peer;
+	
+	BgpConfig bgpConfig;
+	
+	
+	
+}

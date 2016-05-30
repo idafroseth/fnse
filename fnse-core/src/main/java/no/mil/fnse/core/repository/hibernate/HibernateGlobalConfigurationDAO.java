@@ -11,7 +11,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.mil.fnse.core.model.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.repository.GlobalConfigurationDAO;
 
 @Component("hibernateGlobalConfigurationDAO")
