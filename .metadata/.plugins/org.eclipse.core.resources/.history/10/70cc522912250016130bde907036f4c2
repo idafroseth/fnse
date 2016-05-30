@@ -1,6 +1,0 @@
-package no.mil.fnse.configuration;
-
-@Component("configurationStatus")
-public class Status {
-
-}

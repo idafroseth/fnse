@@ -1,8 +1,0 @@
-package no.mil.fnse.southbound.model;
-
-public class Prefixlist {
-	private String name;
-	private int seq;
-	
-
-}

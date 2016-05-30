@@ -1,5 +1,0 @@
-package no.mil.fnse.core.repository;
-
-public class SystemConfigurationDAO {
-
-}

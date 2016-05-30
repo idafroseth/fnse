@@ -1,9 +1,0 @@
-package no.mil.fnse.autoconfiguration.model;
-
-public class LocalConfiguration {
-
-	
-	Peer peer;
-	BgpConfig bgpConfig;
-	
-}

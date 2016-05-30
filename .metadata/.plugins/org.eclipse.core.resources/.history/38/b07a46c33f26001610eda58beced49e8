@@ -1,9 +1,0 @@
-package no.mil.fnse.configuration;
-
-public class SystemWideConfiguration {
-
-	SipConfig sip;
-	NtpConfig ntp;
-	DnsConfig dns;
-	
-}

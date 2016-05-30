@@ -1,5 +1,0 @@
-package no.mil.fnse.repository;
-
-public class HibernateNtpConfigDAO implements NtpConfigDAO {
-
-}

@@ -1,8 +1,0 @@
-package no.mil.fnse.service;
-
-public interface ExternalCommunication {
-
-	boolean connect(InetAddress mngAddress, String username, String password);
-	
-	
-}

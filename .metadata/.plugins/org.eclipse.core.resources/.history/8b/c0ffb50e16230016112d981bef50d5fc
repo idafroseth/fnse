@@ -1,8 +1,0 @@
-package no.mil.fnse.dao;
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = no.mil.fnse.configuration.RootConfig.class)
-public class RouterDAO {
-	
-
-}
