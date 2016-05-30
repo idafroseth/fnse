@@ -2,8 +2,9 @@
 *.tmp
 *.class
 .project
-
+.DS_Store
 .metadata
 .metadata/
 .recommenders
 .recommenders/
+*/target/

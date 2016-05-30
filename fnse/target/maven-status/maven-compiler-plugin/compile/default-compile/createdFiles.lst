@@ -1,9 +1,0 @@
-no/mil/fnse/Application.class
-no/mil/fnse/service/DefaultAutconfService.class
-no/mil/fnse/configuration/DatabaseInitialization.class
-no/mil/fnse/discovery/service/DiscoveryService.class
-no/mil/fnse/controller/AutoconfigurationController.class
-no/mil/fnse/discovery/service/DiscoveryServiceImpl.class
-no/mil/fnse/service/AutoconfigurationService.class
-no/mil/fnse/configuration/DiscoveryConfiguration.class
-no/mil/fnse/configuration/Status.class
