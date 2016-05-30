@@ -3,5 +3,5 @@
 *.class
 .project
 
-.metadata/
-.recommenders/
+/.metadata
+/.recommenders
