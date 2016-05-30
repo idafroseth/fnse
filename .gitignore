@@ -4,4 +4,6 @@
 .project
 
 .metadata
+.metadata/
 .recommenders
+.recommenders/
