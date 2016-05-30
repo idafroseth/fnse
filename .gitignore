@@ -8,3 +8,5 @@
 .recommenders
 .recommenders/
 */target/
+*/.settings
+*/.classpath
