@@ -24,11 +24,11 @@ public class SDNController {
 
 	@JsonProperty("ip")
 	String ipAddress;
-	
+
 	@JsonProperty("id")
 	int entityId;
 	
-	@JsonProperty("i")
+	@JsonProperty("interval")
 	private int helloInterval;
 	
 

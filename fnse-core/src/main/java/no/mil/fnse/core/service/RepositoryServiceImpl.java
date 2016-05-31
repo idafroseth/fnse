@@ -21,16 +21,19 @@ import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.model.SystemConfiguration;
 import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.model.values.PeerStatus;
 import no.mil.fnse.core.repository.BgpConfigDAO;
 import no.mil.fnse.core.repository.GlobalConfigurationDAO;
+import no.mil.fnse.core.repository.InterfaceAddressDAO;
 import no.mil.fnse.core.repository.NetworkInterfaceDAO;
 import no.mil.fnse.core.repository.PeerDAO;
 import no.mil.fnse.core.repository.RouterDAO;
 import no.mil.fnse.core.repository.SDNControllerDAO;
 import no.mil.fnse.core.repository.SystemConfigurationDAO;
+import no.mil.fnse.core.repository.hibernate.HibernateInterfaceAddressDAO;
 
 @Transactional
 @Component("defaultreposervice")
@@ -57,6 +60,9 @@ public class RepositoryServiceImpl implements RepositoryService{
 	@Autowired
 	SystemConfigurationDAO hibernateSystemConfigurationDAO;
 	
+	@Autowired
+	InterfaceAddressDAO hibernateInterfaceAddressDAO;
+	
 	
 	
 	static Logger logger = Logger.getLogger(RepositoryServiceImpl.class);
@@ -72,20 +78,23 @@ public class RepositoryServiceImpl implements RepositoryService{
 			return 0;
 		}
 		if (hibernatePeerDAO.getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp()) != null) {
-			updatePeer(hibernatePeerDAO.getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp()).getId(), peer.getDeadTime(), peer.getStatus());
+			updatePeer(hibernatePeerDAO.getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp()).getId(), peer.getDeadTime(), peer.getStatus(), peer.getTunnelInterface());
 			return hibernatePeerDAO.getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp()).getId();
 		}
 		return hibernatePeerDAO.savePeer(peer);
 	}
 
 	@Transactional 
-	public void updatePeer(int peerId, Timestamp deadTime, PeerStatus status ){
+	public void updatePeer(int peerId, Timestamp deadTime, PeerStatus status, NetworkInterface tunnel ){
 		Peer peerToChange  = hibernatePeerDAO.getPeer(peerId);
 		if(deadTime != null){	
 			peerToChange.setDeadTime(deadTime);
 		}
 		if(status != null){
 			peerToChange.setStatus(status);
+		}
+		if(tunnel != null){
+			peerToChange.setTunnelInterface(tunnel);
 		}
 	}
 	
@@ -238,16 +247,29 @@ public class RepositoryServiceImpl implements RepositoryService{
 	@Transactional
 	public Router getRouterByNetworkInterface(int neId){
 		logger.debug("Trying to find routers having NE");
-		String hql = "SELECT s from Router s " + "join s.networkInterfaces d " + "where d.id = :neId";
+		String hql = "SELECT r from Router r " + "join r.networkInterfaces d " + "where d.id = :neId";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
 		query.setInteger("neId", neId);
-		return (Router) query.list();
+		return (Router) query.uniqueResult();
 	}
 	
 	@Override
 	@Transactional
-	public NetworkInterface getNetworkInterfaceByIp(InetAddress ip){
+	public NetworkInterface getNetworkInterfaceByAddress(InterfaceAddress ip){
 		return hibernateNetworkInterface.getNetworkInterfaceByAddress(ip);
+	}
+	
+	public InterfaceAddress	getInterfaceAddressByIp(InetAddress ip){
+		return hibernateInterfaceAddressDAO.getInterfaceAddressByIp(ip);
+	}
+	
+	public Router getRouterByLocalIp(InetAddress ip){
+		
+		NetworkInterface ne = getNetworkInterfaceByAddress(getInterfaceAddressByIp(ip));
+		if(ne == null){
+			return null;
+		}else return getRouterByNetworkInterface(ne.getId());
+		
 	}
 	
 	@Override
@@ -375,6 +397,10 @@ public class RepositoryServiceImpl implements RepositoryService{
 
 	@Override
 	public int addNetworkInterface(NetworkInterface ne) {
+		InterfaceAddress ia = hibernateInterfaceAddressDAO.getInterfaceAddressByIp(ne.getInterfaceAddress().getIp());
+		if(ia == null){
+			ne.getInterfaceAddress().setId(hibernateInterfaceAddressDAO.saveInterfaceAddress(ne.getInterfaceAddress()));
+		}
 		return hibernateNetworkInterface.saveNetworkInterface(ne);
 	}
 

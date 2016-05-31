@@ -5,9 +5,11 @@ import java.net.InetAddress;
 import org.apache.log4j.Logger;
 
 public class TunnelInterface extends NetworkInterface{
-	
+
 	private InetAddress tunnelDestination;
 	private InetAddress tunnelSource;
+	
+	private InetAddress remoteIpAddress;
 	
 	static Logger logger = Logger.getLogger(TunnelInterface.class);
 	
@@ -15,12 +17,11 @@ public class TunnelInterface extends NetworkInterface{
 		
 	}
 
-	
+
 	// -------------------------------------------------------------------------
     // Setters and getters
     // -------------------------------------------------------------------------
 	
-
 	public InetAddress getTunnelDestination() {
 		return tunnelDestination;
 	}
@@ -36,5 +37,16 @@ public class TunnelInterface extends NetworkInterface{
 	public void setTunnelSource(InetAddress tunnelSource) {
 		this.tunnelSource = tunnelSource;
 	}
+
+	public InetAddress getRemoteIpAddress() {
+		return remoteIpAddress;
+	}
+
+
+	public void setRemoteIpAddress(InetAddress remoteIpAddress) {
+		this.remoteIpAddress = remoteIpAddress;
+	}
+	
+	
 
 }

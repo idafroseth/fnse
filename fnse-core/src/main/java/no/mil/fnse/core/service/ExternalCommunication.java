@@ -23,4 +23,6 @@ public interface ExternalCommunication {
 	 * Close the connection to the remote host
 	 */
 	void close();
+	
+	boolean isConnected();
 }

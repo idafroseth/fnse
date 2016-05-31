@@ -9,6 +9,7 @@ import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.model.SystemConfiguration;
 import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.model.values.PeerStatus;
@@ -37,7 +38,7 @@ public interface RepositoryService {
 	 * @param deadTime
 	 * @param status
 	 */
-	void updatePeer(int PeerId, Timestamp deadTime, PeerStatus status);
+	void updatePeer(int PeerId, Timestamp deadTime, PeerStatus status, NetworkInterface tunnel);
 
 	/**
 	 * 
@@ -75,7 +76,11 @@ public interface RepositoryService {
 
 	Router getRouterByNetworkInterface(int neId);
 
-	NetworkInterface getNetworkInterfaceByIp(InetAddress ip);
+	NetworkInterface getNetworkInterfaceByAddress(InterfaceAddress ip);
+	
+	InterfaceAddress getInterfaceAddressByIp(InetAddress ip);
+	
+	Router getRouterByLocalIp(InetAddress ip);
 
 	void delRouter(int routerId);
 

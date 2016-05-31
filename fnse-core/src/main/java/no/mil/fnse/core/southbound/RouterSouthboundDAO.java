@@ -7,11 +7,16 @@ import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.BgpPeer;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
+import no.mil.fnse.core.service.SouthboundException;
 
 public  interface RouterSouthboundDAO {
 
 	
-	BgpConfig getBgpConfig(Router router);
+	Router getRouter();
+	
+	void setRouter(Router router);
+	
+
 	
 //	/**
 //	 * Configure a new Peer
@@ -32,21 +37,27 @@ public  interface RouterSouthboundDAO {
 	
 	//List<BGPConfig> getAllConfiguredBGPPeer();
 	
+	BgpConfig getBgpConfig() throws SouthboundException;
+	
 	/**
 	 * Query the networking element for the multicast routing table
 	 * @return a list of IPaddresses of remote peer and interface of local peer
 	 */
-	InetAddress getIpMrouteSource(Router router,String multicastGroup ,InetAddress remotePeer);
+	InetAddress getIpMrouteSource(String multicastGroup ,InetAddress remotePeer) throws SouthboundException;
 	
 	/**
 	 * show ip bgp summary
 	 * @return
 	 */
-	Collection<BgpPeer> getBGPNeighbors(Router router);
+	Collection<BgpPeer> getBGPNeighbors() throws SouthboundException;
 	
 	
-	public InetAddress getSecondaryInterfaceIp(Router router,String interfaceName);
+	InetAddress getSecondaryInterfaceIp(String interfaceName) throws SouthboundException;
 	
-	Collection<NetworkInterface> getNetworkInterfaces(Router router);
+	Collection<NetworkInterface> getNetworkInterfaces() throws SouthboundException;
+	
+	void configureStaticRoute(InetAddress ipNetwork, String netmask, InetAddress nextHop) throws SouthboundException;
+	
+	
 	
 }

@@ -7,8 +7,9 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,7 +30,8 @@ public class MsdpConfig {
 	@JsonIgnore
 	private Collection<String> peer;
 
-	
+	@JsonIgnore
+	static Logger logger = Logger.getLogger(MsdpConfig.class);
 
 	// -------------------------------------------------------------------------
     // Hashcode And Equals

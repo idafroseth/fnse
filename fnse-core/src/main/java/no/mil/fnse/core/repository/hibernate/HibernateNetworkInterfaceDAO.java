@@ -1,6 +1,5 @@
 package no.mil.fnse.core.repository.hibernate;
 
-import java.net.InetAddress;
 import java.util.Collection;
 
 import org.apache.log4j.Logger;
@@ -10,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.mil.fnse.core.model.Peer;
+import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.repository.NetworkInterfaceDAO;
 
@@ -31,9 +30,9 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 
 	public int saveNetworkInterface(NetworkInterface networkInterface) {
 		try {
-			if (getNetworkInterfaceByAddress(networkInterface.getIpAddress()) == null) {
+			if (getNetworkInterfaceByAddress(networkInterface.getInterfaceAddress()) == null) {
 				int id = (Integer) sessionFactory.getCurrentSession().save(networkInterface);
-				logger.info("New networkInterface added to db: " + networkInterface.getIpAddress());
+				logger.info("New networkInterface added to db: " + networkInterface.getInterfaceAddress());
 				return id;
 			} else {
 				return -1;
@@ -44,10 +43,10 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 		}
 	}
 	
-	public NetworkInterface getNetworkInterfaceByAddress(InetAddress interfaceAddress) {
+	public NetworkInterface getNetworkInterfaceByAddress(InterfaceAddress interfaceAdr) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(NetworkInterface.class);
-			criteria.add(Restrictions.eq("ipAddress", interfaceAddress));
+			criteria.add(Restrictions.eq("interfaceAddress", interfaceAdr));
 			return (NetworkInterface) criteria.uniqueResult();
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
@@ -85,7 +84,16 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 
 
 	public void updateNetworkInterface(NetworkInterface networkInterface) {
-		// TODO Auto-generated method stub
+		try{
+			NetworkInterface ifToChange = getNetworkInterface(networkInterface.getId());
+			ifToChange.setInterfaceAddress(networkInterface.getInterfaceAddress());
+			ifToChange.setDescription(networkInterface.getDescription());
+			ifToChange.setIpv6Address(networkInterface.getIpv6Address());
+			sessionFactory.getCurrentSession().update(ifToChange);
+		}catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+
+		}
 		
 	}
 

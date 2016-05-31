@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,12 +12,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.mil.fnse.core.model.networkElement.TunnelInterface;
+import no.mil.fnse.core.model.networkElement.NetworkInterface;
+import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.model.values.PeerStatus;
 
 /**
@@ -47,8 +50,10 @@ public class Peer implements Serializable{
 	private SDNController controller;
 	
 	@JsonProperty("gre_tunnel")
-	private TunnelInterface greTunnel;
+	private NetworkInterface tunnelInterface;
 
+	@JsonIgnore
+	private Router router;
 	
 	public Peer(){
 		
@@ -143,14 +148,25 @@ public class Peer implements Serializable{
 	public void setController(SDNController controller) {
 		this.controller = controller;
 	}
-	
-	@Column(name = "PEER_GRE_TUNNEL")
-	public TunnelInterface getGreTunnel() {
-		return greTunnel;
+
+	@OneToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name = "NETWORKINTERFACE_ID")
+	public NetworkInterface getTunnelInterface() {
+		return tunnelInterface;
 	}
 	
-	public void setGreTunnel(TunnelInterface greTunnel) {
-		this.greTunnel = greTunnel;
+	public void setTunnelInterface(NetworkInterface greTunnel) {
+		this.tunnelInterface = greTunnel;
+	}
+
+	@OneToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name = "ROUTER_ID")
+	public Router getRouter() {
+		return router;
+	}
+
+	public void setRouter(Router router) {
+		this.router = router;
 	}
 	
 	

@@ -1,4 +1,4 @@
-package no.mil.fnse.core.configuration;
+package no.mil.fnse.configuration;
 
 import java.beans.PropertyVetoException;
 import java.util.Properties;
@@ -14,6 +14,7 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -22,6 +23,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import no.mil.fnse.core.model.*;
 import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
+import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.MsdpConfig;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
@@ -43,7 +45,7 @@ public class RootConfig implements SchedulingConfigurer {
 		// String[]{"no.cyfor.zelus.news_stand.dao.hibernate"});
 		sessionFactory.setAnnotatedPackages(new String[] { "no.mil.fnse" });
 		sessionFactory.setAnnotatedClasses(new Class[] { SDNController.class, Peer.class, BgpConfig.class,SystemConfiguration.class,
-				GlobalConfiguration.class, MsdpConfig.class, NetworkInterface.class, NtpConfig.class, Router.class});
+				GlobalConfiguration.class, MsdpConfig.class, NetworkInterface.class, NtpConfig.class, Router.class, InterfaceAddress.class});
 		// sessionFactory.setMappingResources(;//, "model.KeyWord",
 		// "model.Search", "model.Publisher" });
 		sessionFactory.setHibernateProperties(hibernateProperties());

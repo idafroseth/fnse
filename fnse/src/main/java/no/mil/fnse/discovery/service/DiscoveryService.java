@@ -1,6 +1,5 @@
 package no.mil.fnse.discovery.service;
 
-import no.mil.fnse.core.model.Peer;
 
 public interface DiscoveryService {
 

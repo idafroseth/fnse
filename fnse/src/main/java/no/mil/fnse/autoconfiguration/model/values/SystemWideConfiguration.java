@@ -1,4 +1,8 @@
-package no.mil.fnse.core.model;
+package no.mil.fnse.autoconfiguration.model.values;
+
+import no.mil.fnse.core.model.DnsConfig;
+import no.mil.fnse.core.model.NtpConfig;
+import no.mil.fnse.core.model.SipConfig;
 
 public class SystemWideConfiguration {
 

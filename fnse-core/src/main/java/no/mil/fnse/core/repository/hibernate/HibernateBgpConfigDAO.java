@@ -45,6 +45,7 @@ public class HibernateBgpConfigDAO implements BgpConfigDAO {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Transactional
 	public Collection<BgpConfig> getAllNationalBgpConfigs() {
 		try {

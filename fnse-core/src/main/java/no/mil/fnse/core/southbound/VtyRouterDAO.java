@@ -5,16 +5,18 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.BgpPeer;
+import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
+import no.mil.fnse.core.service.SouthboundException;
+import no.mil.fnse.core.service.TelnetCommunication;
 import no.mil.fnse.core.southbound.RouterSouthboundDAO;
 
 @Component("vtyRouterDAO")
@@ -22,11 +24,40 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 
 	static Logger logger = Logger.getLogger(VtyRouterDAO.class);
 
-	public BgpConfig getBgpConfig(Router router) {
+	Router router;
+
+	@Autowired
+	StringMatcher stringMatcher;
+
+	public Router getRouter() {
+		return router;
+	}
+
+	public void setRouter(Router router) {
+		this.router = router;
+	}
+
+	public boolean connect() throws NullPointerException {
+		if (this.router == null) {
+			throw new NullPointerException();
+		}
+		if (this.router.getVty() == null) {
+			router.setVty(new TelnetCommunication());
+		}
+
+		return router.getVty().connect(router.getManagementIp(), router.getUsername(), router.getPassword());
+
+	}
+
+	@Override
+	public BgpConfig getBgpConfig() throws SouthboundException{
+		if (!connect()) {
+			throw new SouthboundException();
+		}
 		BgpConfig bgpConfig = new BgpConfig();
 		String response = router.getVty().send("show run | sec router bgp ");
-		bgpConfig.setAsn(findNextWordAfter("router bgp", response));
-		bgpConfig.setRouterId(findNextWordAfter("router-id", response));
+		bgpConfig.setAsn(stringMatcher.findNextWordAfter("router bgp", response));
+		bgpConfig.setRouterId(stringMatcher.findNextWordAfter("router-id", response));
 		bgpConfig.setNational(true);
 		if (bgpConfig.getAsn() == null || bgpConfig.getRouterId() == null) {
 			return null;
@@ -35,17 +66,20 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public InetAddress getIpMrouteSource(Router router, String multicastGroup, InetAddress remotePeer) {
+	public InetAddress getIpMrouteSource(String multicastGroup, InetAddress remotePeer)  throws SouthboundException{
+		if (!connect()) {
+			throw new SouthboundException();
+		}
 		String response = router.getVty().send("show ip mroute " + remotePeer.toString().substring(1) + " "
 				+ multicastGroup + " | include Incoming interface");
 		logger.debug("Trying to getIpMrouteSource: show ip mroute " + remotePeer.toString().substring(1) + " "
 				+ multicastGroup + " | include Incoming interface");
 
-		String ifName = findFirstWordWithPattern("Ethernet", response);
+		String ifName = stringMatcher.findFirstWordWithPattern("Ethernet", response);
 
 		logger.debug(ifName + " Is this the GI from " + response);
 
-		return getInterfaceIp(router, ifName);
+		return getInterfaceIp(ifName).getIp();
 	}
 
 	/**
@@ -55,10 +89,16 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	 * @param interfaceName
 	 * @return
 	 */
-	private InetAddress getInterfaceIp(Router router, String interfaceName) {
+	private InterfaceAddress getInterfaceIp(String interfaceName)  throws SouthboundException{
+		if (!connect()) {
+			throw new SouthboundException();
+		}
 		try {
-			return InetAddress.getByName(findFirstWordWithPattern("\\.",
+			InetAddress ad = InetAddress.getByName(stringMatcher.findFirstWordWithPattern("\\.",
 					router.getVty().send("show run interface " + interfaceName + " | include ip address")));
+			
+			System.out.println("ADDRESS OF INTERFACE: "+ interfaceName + " adr: " +ad);
+			return new InterfaceAddress(ad,"255.255.255.0");
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			logger.error("Attached failed: " + e);
@@ -74,9 +114,12 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	 * @param interfaceName
 	 * @return
 	 */
-	public InetAddress getSecondaryInterfaceIp(Router router, String interfaceName) {
+	public InetAddress getSecondaryInterfaceIp(String interfaceName) throws SouthboundException{
+		if (!connect()) {
+			throw new SouthboundException();
+		}
 		try {
-			return InetAddress.getByName(findFirstWordWithPattern("\\.",
+			return InetAddress.getByName(stringMatcher.findFirstWordWithPattern("\\.",
 					router.getVty().send("show run interface " + interfaceName + " | include secondary")));
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -87,71 +130,44 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public List<BgpPeer> getBGPNeighbors(Router router) {
+	public List<BgpPeer> getBGPNeighbors() {
 
 		return null;
 	}
 
 	@Override
-	public HashSet<NetworkInterface> getNetworkInterfaces(Router router) {
-		HashSet<NetworkInterface> networkIf = new HashSet<NetworkInterface>();
-		System.out.println("The router VTY is connected ? " + router.getVty());
-		String listInterfaces = router.getVty().send("sh interfaces  summary");
-		System.out.println("This is fetched from router: " + listInterfaces);
-		Collection<String> iflist = findAllWordWithPattern("GigabitEthernet", listInterfaces);
-		 iflist.addAll(findAllWordWithPattern("tunnel", listInterfaces));
-		 iflist.addAll(findAllWordWithPattern("loopback", listInterfaces));
-		for (String interfaceName : iflist) {
-			System.out.println("Found interface name: " + interfaceName);
-			NetworkInterface gigabit = new NetworkInterface();
-			gigabit.setInterfaceName(interfaceName);
-			gigabit.setIpAddress(getInterfaceIp(router, interfaceName));
-			networkIf.add(gigabit);
+	public HashSet<NetworkInterface> getNetworkInterfaces() throws SouthboundException{
+		if (!connect()) {
+			throw new SouthboundException();
 		}
-		return networkIf;
+			HashSet<NetworkInterface> networkIf = new HashSet<NetworkInterface>();
+			System.out.println("The router VTY is connected ? " + router.getVty());
+			String listInterfaces = router.getVty().send("sh interfaces  summary");
+			System.out.println("This is fetched from router: " + listInterfaces);
+			Collection<String> iflist = stringMatcher.findAllWordWithPattern("GigabitEthernet", listInterfaces);
+			iflist.addAll(stringMatcher.findAllWordWithPattern("tunnel", listInterfaces));
+			iflist.addAll(stringMatcher.findAllWordWithPattern("loopback", listInterfaces));
+			for (String interfaceName : iflist) {
+				System.out.println("Found interface name: " + interfaceName);
+				NetworkInterface gigabit = new NetworkInterface();
+				gigabit.setInterfaceName(interfaceName);
+				gigabit.setInterfaceAddress(getInterfaceIp(interfaceName));
+				networkIf.add(gigabit);
+			}
+			return networkIf;
+
 	}
 
-	/**
-	 * Search for a searchString in a text and return the entire word. return
-	 * null if the text does not contain the pattern.
-	 * 
-	 * @param searchString
-	 * @param text
-	 * @return the first word containing the pattern
-	 */
-	public String findFirstWordWithPattern(String searchString, String text) {
-
-		String sPattern = "(?i)\\b\\S*" + searchString + "\\S*\\b";
-		Pattern pattern = Pattern.compile(sPattern);
-		Matcher matcher = pattern.matcher(text);
-		while (matcher.find()) {
-			return matcher.group();
+	public void configureStaticRoute(InetAddress ipNetwork, String netmask, InetAddress nextHop)  throws SouthboundException{
+		if (!connect()) {
+			throw new SouthboundException();
 		}
-		return null;
-	}
-
-	public Collection<String> findAllWordWithPattern(String searchPattern, String text) {
-
-		String sPattern = "(?i)\\b\\S*" + searchPattern + "\\S*\\b";
-		Pattern pattern = Pattern.compile(sPattern);
-		Matcher matcher = pattern.matcher(text);
-		Collection<String> result = new HashSet<String>();
-		while (matcher.find()) {
-			result.add(matcher.group());
-		}
-		return result;
-	}
-
-	public String findNextWordAfter(String previousPatter, String text) {
-		// String result ="";
-		String sPattern = "(?<=" + previousPatter + ")\\s*(\\S+)";
-		Pattern pattern = Pattern.compile(sPattern);
-		Matcher matcher = pattern.matcher(text);
-		while (matcher.find()) {
-			return matcher.group();
-		}
-		return null;
-
+		System.out.println("Trying to write to the terminal" );
+		router.getVty().send("configure terminal");
+		System.out.println(router.getVty().send("ip route " + ipNetwork + " " + netmask + " " + nextHop.toString().substring(1) ));
+		router.getVty().send("end");
+		System.out.println("NOW the router should have a new route");
+		
 	}
 
 	// public static void main(String[] args) {

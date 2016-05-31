@@ -1,10 +1,10 @@
 package no.mil.fnse.autoconfiguration.service;
 
+import no.mil.fnse.autoconfiguration.model.values.SystemWideConfiguration;
 import no.mil.fnse.core.model.DnsConfig;
 import no.mil.fnse.core.model.NtpConfig;
 import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.SipConfig;
-import no.mil.fnse.core.model.SystemWideConfiguration;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.model.networkElement.TunnelInterface;
 
@@ -58,6 +58,7 @@ public interface AutoconfigurationService {
 	
 	DnsConfig updateDnsConfig(DnsConfig config);
 	
+	void configureNewPeers();
 	
 
 }

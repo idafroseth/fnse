@@ -6,26 +6,38 @@ import java.net.UnknownHostException;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import no.mil.fnse.autoconfiguration.model.values.SystemWideConfiguration;
+import no.mil.fnse.configuration.AutoconfConfiguration;
+import no.mil.fnse.configuration.DatabaseInitialization;
 import no.mil.fnse.core.model.DnsConfig;
 import no.mil.fnse.core.model.NtpConfig;
 import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.SipConfig;
-import no.mil.fnse.core.model.SystemWideConfiguration;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.TunnelInterface;
+import no.mil.fnse.core.model.values.PeerStatus;
 import no.mil.fnse.core.service.RepositoryService;
+import no.mil.fnse.core.service.SouthboundException;
+import no.mil.fnse.core.southbound.RouterSouthboundDAO;
+import no.mil.fnse.discovery.service.DiscoveryServiceImpl;
 
-@Component("defaultAutoconfSerivice")
+@Component("defaultAutoconfService")
 public class DefaultAutconfService implements AutoconfigurationService {
 
-	
 	@Autowired
 	RepositoryService defaultreposervice;
-	
+
+	@Autowired
+	RouterSouthboundDAO vtyRouterDAO;
+
 	static Logger logger = Logger.getLogger(AutoconfigurationService.class);
+
+	boolean isListeningPeers = false;
+	boolean deadPeerListenerStarted = false;
 
 	@Override
 	public TunnelInterface getTunnelInterface(String localIp, String remoteIp) {
@@ -44,13 +56,14 @@ public class DefaultAutconfService implements AutoconfigurationService {
 			logger.error("The recieved address is not valid");
 			return null;
 		}
-		
-		NetworkInterface networkif = defaultreposervice.getNetworkInterfaceByIp(local);
-		if(networkif == null){
-			logger.error("Could not find network interface of local Ip: "+ local);
+
+		NetworkInterface networkif = defaultreposervice
+				.getNetworkInterfaceByAddress(defaultreposervice.getInterfaceAddressByIp(local));
+		if (networkif == null) {
+			logger.error("Could not find network interface of local Ip: " + local);
 			return new GlobalConfiguration();
 		}
-		return networkif.getRouter().getGlobalConfiguration();
+		return defaultreposervice.getRouterByNetworkInterface(networkif.getId()).getGlobalConfiguration();
 	}
 
 	@Override
@@ -105,5 +118,87 @@ public class DefaultAutconfService implements AutoconfigurationService {
 		logger.error("updateDnsConfig METHOD NOT IMPLEMENTED YET!!");
 		return null;
 	}
-	
+
+	/*
+	 * This method has to 1) Configure routing from controller to remote
+	 * controller 2) decide the gre tunnel address 3) fetch the configuration
+	 * from remote peer 4) configure the router 5) Update the database
+	 */
+	@Scheduled(initialDelay = 30 * 1000, fixedDelay = Long.MAX_VALUE)
+	public void configureNewPeers() {
+		if (isListeningPeers) {
+			return;
+		}
+
+		logger.info("******* Autoconf Starting to listen for new peers!!");
+		while (true) {
+			isListeningPeers = true;
+			while (DiscoveryServiceImpl.configurationQueue.isEmpty()) {
+				try {
+					Thread.sleep(5 * 1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			Peer neighbor = DiscoveryServiceImpl.configurationQueue.removeFirst();
+			System.out.println("Configuring peer: " + neighbor.getId());
+			vtyRouterDAO.setRouter(neighbor.getRouter());
+			try {
+				vtyRouterDAO.configureStaticRoute(neighbor.getRemoteInterfaceIp(), "255.255.255.255",
+						neighbor.getLocalInterfaceIp());
+			} catch (SouthboundException e) {
+				logger.error("Attached failed: " + e);
+				e.printStackTrace();
+			}
+
+			NetworkInterface tunnel;
+
+			if (neighbor.getController().getEntityId() < DatabaseInitialization.CONFIGURATION.getNationalController()
+					.getEntityId()) {
+				tunnel = AutoconfConfiguration.grePool.getFirst();
+				tunnel.setDescription("Tunnel_to:" + neighbor.getController().getEntityId());
+
+			} else {
+				// "GET REQUEST TO PEER"
+				tunnel = new NetworkInterface();
+			}
+			neighbor.setTunnelInterface(tunnel);
+
+			// VI MÅ OGSÅ HENTE ALL CONFIG FRA REMOTE PEER
+
+			/// CONFIGURE THE PEER
+
+			defaultreposervice.updatePeer(neighbor.getId(), neighbor.getDeadTime(), PeerStatus.CONFIGURED,
+					neighbor.getTunnelInterface());
+		}
+
+	}
+
+	/*
+	 * 1) This method has to delete all configuration of the peer. 2) Put the
+	 * network interface back in the database 3) Remove the peer from the
+	 * database
+	 */
+	@Scheduled(initialDelay = 30 * 1000, fixedDelay = Long.MAX_VALUE)
+	public void removeDeadPeers() {
+		if(deadPeerListenerStarted){
+			return;
+		}
+		System.out.println("******* Autoconf Starting to listen for deadPeers!!");
+		while (true) {
+			deadPeerListenerStarted=true;
+			while (DiscoveryServiceImpl.deadQueue.isEmpty()) {
+			}
+
+			Peer deadNeighbor = DiscoveryServiceImpl.deadQueue.removeFirst();
+
+			// DELETE THE CONFIGURATION FOR THIS PEER
+
+			defaultreposervice.delPeer(deadNeighbor.getId());
+		}
+
+	}
+
 }

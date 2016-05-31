@@ -5,16 +5,22 @@ import org.springframework.stereotype.Component;
 @Component("configurationStatus")
 public class Status {
 	
-	private boolean databaseIsConfigured;
+	public static Boolean databaseIsConfigured = false;
+	
+	public static Boolean helloSocketIsReady = false;
+	
+	
 
-	public boolean isDatabaseIsConfigured() {
+	public Boolean isDatabaseIsConfigured() {
 		return databaseIsConfigured;
 	}
 
-	public void setDatabaseIsConfigured(boolean databaseIsConfigured) {
-		this.databaseIsConfigured = databaseIsConfigured;
+	public void setDatabaseIsConfigured(Boolean databaseIsConfigured) {
+		Status.databaseIsConfigured = databaseIsConfigured;
 	}
 	
-	
+	public Boolean getDatabaseIsConfigured( ) {
+		return Status.databaseIsConfigured;
+	}
 
 }

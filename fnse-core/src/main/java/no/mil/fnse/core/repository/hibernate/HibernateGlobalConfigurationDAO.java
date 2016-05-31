@@ -57,6 +57,7 @@ public class HibernateGlobalConfigurationDAO implements GlobalConfigurationDAO {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Transactional
 	public Collection<GlobalConfiguration> getAllNationalGlobalConfigurations() {
 		try {

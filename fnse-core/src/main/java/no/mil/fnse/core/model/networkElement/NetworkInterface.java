@@ -1,7 +1,6 @@
 package no.mil.fnse.core.model.networkElement;
 
-import java.net.InetAddress;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -22,13 +22,13 @@ import org.apache.log4j.Logger;
 @Table(name="networkinterface")
 public class NetworkInterface {
 	private int id;
-	private InetAddress ipAddress;
-	private InetAddress ipv6Address;
+	private InterfaceAddress interfaceAddress;
+	private InterfaceAddress ipv6Address;
 	private String description;
 	private String interfaceName;
-	
+//	
 	private Router router;
-	
+//	
 	static Logger logger = Logger.getLogger(NetworkInterface.class);
 	
 	
@@ -64,8 +64,8 @@ public class NetworkInterface {
     // -------------------------------------------------------------------------
 	
     @Id
-	@GeneratedValue
 	@Column(name = "NETWORKINTERFACE_ID", unique = true, nullable = false)
+    @GeneratedValue
 	public int getId() {
 		return id;
 	}
@@ -73,7 +73,7 @@ public class NetworkInterface {
 	public void setId(int id) {
 		this.id = id;
 	}
-	@Column(name = "IF_NAME")
+	@Column(name="IF_NAME")
 	public String getInterfaceName() {
 		return interfaceName;
 	}
@@ -81,19 +81,21 @@ public class NetworkInterface {
 		this.interfaceName = ifName;
 	}
 	
-	@Column(name="IP4_ADR")
-	public InetAddress getIpAddress() {
-		return ipAddress;
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="INTERFACE_ADDRESS_ID")
+	public InterfaceAddress getInterfaceAddress() {
+		return interfaceAddress;
 	}
-	public void setIpAddress(InetAddress ipAddress) {
-		this.ipAddress = ipAddress;
+	
+	public void setInterfaceAddress(InterfaceAddress interfaceAddress) {
+		this.interfaceAddress = interfaceAddress;
 	}
 	
 	@Transient
-	public InetAddress getIpv6Address() {
+	public InterfaceAddress getIpv6Address() {
 		return ipv6Address;
 	}
-	public void setIpv6Address(InetAddress ipv6Address) {
+	public void setIpv6Address(InterfaceAddress ipv6Address) {
 		this.ipv6Address = ipv6Address;
 	}
 	
@@ -105,7 +107,7 @@ public class NetworkInterface {
 		this.description = description;
 	}
 	
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "ROUTER_ID", nullable = false)
 	public Router getRouter() {
 		return router;
@@ -113,6 +115,6 @@ public class NetworkInterface {
 	public void setRouter(Router router) {
 		this.router = router;
 	}
-
-	
+//
+//	
 }

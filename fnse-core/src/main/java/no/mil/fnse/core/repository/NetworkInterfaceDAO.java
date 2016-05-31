@@ -1,8 +1,8 @@
 package no.mil.fnse.core.repository;
 
-import java.net.InetAddress;
 import java.util.Collection;
 
+import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 
 public interface NetworkInterfaceDAO {
@@ -27,7 +27,7 @@ public interface NetworkInterfaceDAO {
 	 * @param ip
 	 * @return the NetworkInterface or null if it does not exists
 	 */
-	NetworkInterface getNetworkInterfaceByAddress(InetAddress interfaceAddress);
+	NetworkInterface getNetworkInterfaceByAddress(InterfaceAddress interfaceAddress);
 	
 	/**
 	 * Returns all the NetworkInterfaces in the database

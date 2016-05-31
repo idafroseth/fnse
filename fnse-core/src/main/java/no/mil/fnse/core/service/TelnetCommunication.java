@@ -7,11 +7,11 @@ import java.net.InetAddress;
 
 import org.apache.commons.net.telnet.TelnetClient;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
+@Component("vty")
 public class TelnetCommunication implements ExternalCommunication {
 	private TelnetClient telnetSocket = new TelnetClient();
-	
-	boolean isconnected = false;
 	
 	String prompt = "#";
 	
@@ -24,6 +24,9 @@ public class TelnetCommunication implements ExternalCommunication {
 
 
 	public boolean connect(InetAddress managementIp,  String username, String password) {
+		if(telnetSocket.isConnected()){
+			return true;
+		}
 		try {
 			telnetSocket.connect(managementIp, TELNETPORT);
 			telnetSocket.setKeepAlive(true);
@@ -77,13 +80,17 @@ public class TelnetCommunication implements ExternalCommunication {
     /**
      * Closes the connection. 
      */ 
-    public void close()  { 
+    public void close(){ 
         try { 
             telnetSocket.disconnect(); 
         } catch (IOException ioe) { 
-            logger.error(ioe); 
+            logger.error(ioe);
         } 
     } 
+    
+    public boolean isConnected(){
+    	return telnetSocket.isConnected();
+    }
 	
     /**
      * Reads input stream until the given pattern is reached. The  
@@ -119,6 +126,7 @@ public class TelnetCommunication implements ExternalCommunication {
         out.flush(); 
         //logger.debug(value); 
     }
+    
 
 
 }

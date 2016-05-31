@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.SDNController;
-import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.repository.PeerDAO;
 
 @Transactional
@@ -127,8 +126,15 @@ public class HibernatePeerDAO implements PeerDAO{
 	public void updatePeer(Peer peer) {
 		try{
 			Peer peerToChange = getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp());
-			peerToChange.setDeadTime(peer.getDeadTime());
-			peerToChange.setStatus(peer.getStatus());
+			if(peer.getDeadTime() != null){
+				peerToChange.setDeadTime(peer.getDeadTime());
+			}   
+			if(peer.getStatus()!= null){
+				peerToChange.setStatus(peer.getStatus());
+			}
+			if(peer.getTunnelInterface()!= null){
+				peerToChange.setTunnelInterface(peer.getTunnelInterface());
+			}
 			sessionFactory.getCurrentSession().update(peerToChange);
 		}catch (RuntimeException re) {
 			logger.error("Attached failed" + re);

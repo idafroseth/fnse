@@ -1,4 +1,6 @@
-package no.mil.fnse.controller;
+package no.mil.fnse.east_west;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import no.mil.fnse.autoconfiguration.model.values.ConfigType;
+import no.mil.fnse.autoconfiguration.model.values.SystemWideConfiguration;
 import no.mil.fnse.autoconfiguration.service.AutoconfigurationService;
 import no.mil.fnse.core.model.DnsConfig;
 import no.mil.fnse.core.model.NtpConfig;
 import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.SipConfig;
-import no.mil.fnse.core.model.SystemWideConfiguration;
 import no.mil.fnse.core.model.networkElement.TunnelInterface;
 
 @RestController
@@ -60,8 +62,9 @@ public class AutoconfigurationController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/api/configuration/global")
-    public SystemWideConfiguration getGlobalConfiguration() {
+    public SystemWideConfiguration getGlobalConfiguration(HttpServletRequest request) {
     	logger.info("Trying to access the global configuration");
+    	logger.debug(request.getRemoteAddr());
         return defaultAutoconfService.getSystemWideConfiguration();
     }
     
@@ -71,7 +74,7 @@ public class AutoconfigurationController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/api/configuration/global/{configType}")
-    public <E> Object getGlobalConfiguration(@PathVariable ConfigType configType) {
+    public <E> Object getGlobalConfiguration(@PathVariable ConfigType configType, HttpServletRequest request) {
     	switch(configType){
     		case SIP:
     			return defaultAutoconfService.getSipConfig();

@@ -1,7 +1,6 @@
 package no.mil.fnse.core.model.networkElement;
 
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -17,6 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -47,6 +47,7 @@ public class Router {
 	
 	
 	@JsonIgnore
+	@Autowired
 	private ExternalCommunication vty;
 
 	@JsonIgnore
@@ -153,7 +154,7 @@ public class Router {
 		return this.password;
 	}
 	
-	@OneToOne
+	@OneToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name = "GLOBAL_CONFIG")
 	public GlobalConfiguration getGlobalConfiguration() {
 		return globalConfiguration;
@@ -163,7 +164,7 @@ public class Router {
 		this.globalConfiguration = globalConfiguration;
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "router")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "router")
 	public List<NetworkInterface> getNetworkInterfaces() {
 		return networkInterfaces;
 	}
