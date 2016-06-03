@@ -32,6 +32,21 @@ public class NetworkInterface {
 	static Logger logger = Logger.getLogger(NetworkInterface.class);
 	
 	
+	public NetworkInterface(){
+		
+	}
+	
+	public NetworkInterface(String name, String description){
+		this.interfaceName = name;
+		this.description = description;
+	}
+	
+	public NetworkInterface(String name, String description, InterfaceAddress ifAdr){
+		this.interfaceName = name;
+		this.description = description;
+		this.interfaceAddress = ifAdr;
+	}
+	
 	// -------------------------------------------------------------------------
     // Hashcode and equals
     // -------------------------------------------------------------------------
@@ -81,7 +96,7 @@ public class NetworkInterface {
 		this.interfaceName = ifName;
 	}
 	
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="INTERFACE_ADDRESS_ID")
 	public InterfaceAddress getInterfaceAddress() {
 		return interfaceAddress;

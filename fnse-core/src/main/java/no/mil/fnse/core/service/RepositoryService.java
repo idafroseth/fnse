@@ -40,6 +40,9 @@ public interface RepositoryService {
 	 */
 	void updatePeer(int PeerId, Timestamp deadTime, PeerStatus status, NetworkInterface tunnel);
 
+	
+	public Collection<Peer> getAllDeadPeers(Timestamp currentTime);
+	
 	/**
 	 * 
 	 * @param localIp

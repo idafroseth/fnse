@@ -112,7 +112,7 @@ public class SDNController {
 		this.helloInterval = helloInterval;
 	}
 	
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "controller")
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "controller")
 	public Collection<Peer> getPeers() {
 		return peers;
 	}

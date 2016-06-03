@@ -140,7 +140,7 @@ public class Peer implements Serializable{
 		this.status = status;
 	}
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CONTROLLER_ID", nullable = false)
 	public SDNController getController() {
 		return controller;
@@ -149,7 +149,7 @@ public class Peer implements Serializable{
 		this.controller = controller;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL)
+	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "NETWORKINTERFACE_ID")
 	public NetworkInterface getTunnelInterface() {
 		return tunnelInterface;
@@ -159,7 +159,7 @@ public class Peer implements Serializable{
 		this.tunnelInterface = greTunnel;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL)
+	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ROUTER_ID")
 	public Router getRouter() {
 		return router;

@@ -3,8 +3,10 @@ package no.mil.fnse.core.southbound;
 import java.net.InetAddress;
 import java.util.Collection;
 
+import no.mil.fnse.core.model.NtpConfig;
+import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.networkElement.BgpConfig;
-import no.mil.fnse.core.model.networkElement.BgpPeer;
+import no.mil.fnse.core.model.networkElement.MsdpConfig;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.service.SouthboundException;
@@ -17,6 +19,15 @@ public  interface RouterSouthboundDAO {
 	void setRouter(Router router);
 	
 
+	void configureBgpPeer(String localAsn, BgpConfig bgpPeer);
+	void removeBgpPeer(String localAsn, BgpConfig bgpPeer);
+	void configureNtpPeer(NtpConfig ntpPeer);
+	void removeNtpPeer(NtpConfig ntpPeer);
+	void configureTunnel(Peer peer);
+	void removeTunnel(Peer Peer);
+	void configureMsdpPeer(MsdpConfig config, String loopbackinterface);
+	void removeMsdpPeer(MsdpConfig config);
+	
 	
 //	/**
 //	 * Configure a new Peer
@@ -49,14 +60,14 @@ public  interface RouterSouthboundDAO {
 	 * show ip bgp summary
 	 * @return
 	 */
-	Collection<BgpPeer> getBGPNeighbors() throws SouthboundException;
+	Collection<BgpConfig> getBGPNeighbors() throws SouthboundException;
 	
 	
 	InetAddress getSecondaryInterfaceIp(String interfaceName) throws SouthboundException;
 	
 	Collection<NetworkInterface> getNetworkInterfaces() throws SouthboundException;
 	
-	void configureStaticRoute(InetAddress ipNetwork, String netmask, InetAddress nextHop) throws SouthboundException;
+	void configureStaticRoute(InetAddress ipNetwork, String netmask, String nextHop) throws SouthboundException;
 	
 	
 	

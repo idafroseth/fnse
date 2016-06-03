@@ -1,90 +1,94 @@
 package no.mil.fnse.configuration;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Scheduled;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import no.mil.fnse.core.model.SystemConfiguration;
-import no.mil.fnse.discovery.service.DiscoveryService;
-import no.mil.fnse.discovery.service.DiscoveryServiceImpl;
+import no.mil.fnse.service.DiscoveryServiceImpl;
 
 @Configuration
-@Transactional
+@ConfigurationProperties(ignoreUnknownFields=false, prefix = "discovery")
 public class DiscoveryConfiguration {
+	
+	@NotNull
+	public int timetolive;
 
-	static Logger logger = Logger.getLogger(DiscoveryConfiguration.class);
+	public boolean loopbackmode;
+
+	public InetAddress group;
+	
+	@NotNull
+	public int port;
+
 	
 	
-	public static String HELLO_MSG;
-	public static MulticastSocket SERVER_SOCKET;
-	public static MulticastSocket CLIENT_SOCKET;
-	public static DatagramPacket HELLO_PACKET;
-
-	private final int TTL = 10;
-
-	public static boolean discoveryIsConfigured = false;
+	@Bean
+	public MulticastSocket serverSocket() throws NumberFormatException, IOException{
+		MulticastSocket serverSocket = new MulticastSocket(0);
+		serverSocket.setTimeToLive(timetolive);
+		serverSocket.setLoopbackMode(loopbackmode);
+		return serverSocket;
+	}
 	
-	@Autowired
-	private DiscoveryService discoveryServiceImpl;
+	@Bean
+	public MulticastSocket clientSocket() throws IOException{
+		MulticastSocket clientSocket = new MulticastSocket(port);
+		clientSocket.joinGroup(group);
+		return clientSocket;
+		
+	}
 	
-
-
-	/**
-	 * Read the config.json file and configuring the basic values as Hello
-	 * interval,
-	 */
-	@Scheduled(initialDelay = 5*1000, fixedRate = Long.MAX_VALUE)
-	public void configure() {
-		System.out.println("*****************TRYING TO CONFIGURE DISCOVERY SERVICE");
-		while(!Status.databaseIsConfigured){
-			try {
-				Thread.sleep(5*1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		System.out.println("NOW CONFIGURING DISCOVERY SERVICE");
-		if (!discoveryIsConfigured) {
-			ObjectMapper mapper = new ObjectMapper();
-			try {
-				discoveryIsConfigured = true;
-				// Generate hello message from config
-				SystemConfiguration config = DatabaseInitialization.CONFIGURATION;
-				HELLO_MSG = mapper.writeValueAsString(config.getNationalController());
-				// Setup a socket to listen and send packages to/from
-				// The server sender port in the HELLO_PACKET should be the
-				// same
-				// as the listener
-				CLIENT_SOCKET = new MulticastSocket(config.getHelloPort());
-				SERVER_SOCKET = new MulticastSocket(0);
-				SERVER_SOCKET.setTimeToLive(TTL);
-				SERVER_SOCKET.setLoopbackMode(true);
-				// Join group is only nessecary for the listener. Should be
-				// sent
-				// regulary..
-				CLIENT_SOCKET.joinGroup(config.getDiscoveryMulticastGroup());
-				HELLO_PACKET = new DatagramPacket(HELLO_MSG.getBytes(), HELLO_MSG.getBytes().length,
-						config.getDiscoveryMulticastGroup(), config.getHelloPort());
-				Status.helloSocketIsReady = true;
-				discoveryServiceImpl.listenHello();
-
-			} catch (IOException e) {
-				logger.error("Attached failed: " + e);
-			}
-			discoveryIsConfigured = true;
-			
-		}
-
+	@Bean
+	public DiscoveryServiceImpl discoveryService(){
+		DiscoveryServiceImpl discoveryService = new DiscoveryServiceImpl();
+		discoveryService.setGroup(group);
+//		discoveryService.setClientSocket(clientSocket());
+//		discoveryService.setServerSocket(serverSocket());
+		return discoveryService ;
+	}
+	
+	@Bean 
+	public SystemConfiguration systemConfiguration(){
+		return new SystemConfiguration();
 	}
 
+	public int getTimetolive() {
+		return timetolive;
+	}
+
+	public void setTimetolive(int timetolive) {
+		this.timetolive = timetolive;
+	}
+
+	public boolean getLoopbackmode() {
+		return loopbackmode;
+	}
+
+	public void setLoopbackmode(boolean loopbackmode) {
+		this.loopbackmode = loopbackmode;
+	}
+
+	public InetAddress getGroup() {
+		return group;
+	}
+
+	public void setGroup(InetAddress group) {
+		this.group = group;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	
 }

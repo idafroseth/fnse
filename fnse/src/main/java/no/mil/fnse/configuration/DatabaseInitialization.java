@@ -1,18 +1,11 @@
 package no.mil.fnse.configuration;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
-
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import no.mil.fnse.core.model.SystemConfiguration;
 import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
@@ -32,36 +25,22 @@ public class DatabaseInitialization {
 	VtyRouterDAO vtyRouterDAO;
 
 	@Autowired
-	Status configurationStatus;
+	SystemConfiguration systemConfiguration;
 
 	static Logger logger = Logger.getLogger(DatabaseInitialization.class);
-
-	public static SystemConfiguration CONFIGURATION;
 
 	/**
 	 * Read the config.json file and configuring the basic values as Hello
 	 * interval,
 	 */
-	@Scheduled(initialDelay = 1, fixedRate = Long.MAX_VALUE)
 	public void configure() {
-		if (!Status.databaseIsConfigured) {
-			ObjectMapper mapper = new ObjectMapper();
-			try {
-				CONFIGURATION = mapper.readValue(new File(System.getProperty("user.dir") + "/config.json"),
-						SystemConfiguration.class);
+		System.out.println("initializing the database");
 
-				setRoutersAsNational(CONFIGURATION.getNetworkElements());
+		setRoutersAsNational(systemConfiguration.getNationalRouters());
 
-				defaultreposervice.addSystemConfiguration(CONFIGURATION);
+		fetchConfigurationFromNetworkElement();
 
-				fetchConfigurationFromNetworkElement();
-				Status.databaseIsConfigured = true;
-				System.out.println("DATABASE READY: " + configurationStatus.getDatabaseIsConfigured());
-
-			} catch (IOException e) {
-				logger.error("Attached failed: " + e);
-			}
-		}
+		System.out.println("DATABASE IS READY");
 
 	}
 
@@ -71,20 +50,11 @@ public class DatabaseInitialization {
 		}
 	}
 
-	// private void persistRouters(Collection<Router> routers) {
-	// for (Router router : routers) {
-	// router.setNational(true);
-	// router.setId(defaultrepoService.addRouter(router));
-	// }
-	//
-	// }
-
 	private void connectToNetworkElements() {
 
-		for (Router router : CONFIGURATION.getNetworkElements()) {
+		for (Router router : systemConfiguration.getNationalRouters()) {
 			router.setVty(new TelnetCommunication());
 			router.openVty();
-			logger.info("Successful connection to NetworkElement - " + router.getManagementIp());
 		}
 
 	}
@@ -93,7 +63,7 @@ public class DatabaseInitialization {
 
 		connectToNetworkElements();
 
-		for (Router router : CONFIGURATION.getNetworkElements()) {
+		for (Router router : systemConfiguration.getNationalRouters()) {
 			/*
 			 * 0) get from network element and persist Interface config 1) get
 			 * from network element and persist BGP config
@@ -101,9 +71,9 @@ public class DatabaseInitialization {
 			router.setId(defaultreposervice.addRouter(router));
 			try {
 				vtyRouterDAO.setRouter(router);
-				
+
 				Collection<NetworkInterface> neList = vtyRouterDAO.getNetworkInterfaces();
-				
+
 				for (NetworkInterface ne : neList) {
 					ne.setRouter(router);
 					defaultreposervice.addNetworkInterface(ne);

@@ -10,9 +10,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import no.mil.fnse.core.model.NtpConfig;
+import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.networkElement.BgpConfig;
-import no.mil.fnse.core.model.networkElement.BgpPeer;
 import no.mil.fnse.core.model.networkElement.InterfaceAddress;
+import no.mil.fnse.core.model.networkElement.MsdpConfig;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.service.SouthboundException;
@@ -70,6 +72,8 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 		if (!connect()) {
 			throw new SouthboundException();
 		}
+		logger.info("show ip mroute " + remotePeer.toString().substring(1) + " "
+				+ multicastGroup + " | include Incoming interface");
 		String response = router.getVty().send("show ip mroute " + remotePeer.toString().substring(1) + " "
 				+ multicastGroup + " | include Incoming interface");
 		logger.debug("Trying to getIpMrouteSource: show ip mroute " + remotePeer.toString().substring(1) + " "
@@ -97,7 +101,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 			InetAddress ad = InetAddress.getByName(stringMatcher.findFirstWordWithPattern("\\.",
 					router.getVty().send("show run interface " + interfaceName + " | include ip address")));
 			
-			System.out.println("ADDRESS OF INTERFACE: "+ interfaceName + " adr: " +ad);
+			logger.info("ADDRESS OF INTERFACE: "+ interfaceName + " adr: " +ad);
 			return new InterfaceAddress(ad,"255.255.255.0");
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -130,7 +134,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public List<BgpPeer> getBGPNeighbors() {
+	public List<BgpConfig> getBGPNeighbors() {
 
 		return null;
 	}
@@ -141,14 +145,14 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 			throw new SouthboundException();
 		}
 			HashSet<NetworkInterface> networkIf = new HashSet<NetworkInterface>();
-			System.out.println("The router VTY is connected ? " + router.getVty());
+			logger.info("The router VTY is connected ? " + router.getVty());
 			String listInterfaces = router.getVty().send("sh interfaces  summary");
-			System.out.println("This is fetched from router: " + listInterfaces);
+			logger.info("This is fetched from router: " + listInterfaces);
 			Collection<String> iflist = stringMatcher.findAllWordWithPattern("GigabitEthernet", listInterfaces);
 			iflist.addAll(stringMatcher.findAllWordWithPattern("tunnel", listInterfaces));
 			iflist.addAll(stringMatcher.findAllWordWithPattern("loopback", listInterfaces));
 			for (String interfaceName : iflist) {
-				System.out.println("Found interface name: " + interfaceName);
+				logger.info("Found interface name: " + interfaceName);
 				NetworkInterface gigabit = new NetworkInterface();
 				gigabit.setInterfaceName(interfaceName);
 				gigabit.setInterfaceAddress(getInterfaceIp(interfaceName));
@@ -158,17 +162,81 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 
 	}
 
-	public void configureStaticRoute(InetAddress ipNetwork, String netmask, InetAddress nextHop)  throws SouthboundException{
+	public void configureStaticRoute(InetAddress ipNetwork, String netmask, String nextHop)  throws SouthboundException{
 		if (!connect()) {
 			throw new SouthboundException();
 		}
-		System.out.println("Trying to write to the terminal" );
+		logger.info("Trying to write to the terminal" );
 		router.getVty().send("configure terminal");
-		System.out.println(router.getVty().send("ip route " + ipNetwork + " " + netmask + " " + nextHop.toString().substring(1) ));
+		logger.info(router.getVty().send("ip route " + ipNetwork.toString().substring(1) + " " + netmask + " " + nextHop ));
 		router.getVty().send("end");
-		System.out.println("NOW the router should have a new route");
+		logger.info("NOW the router should have a new route");
 		
 	}
+	
+	public void configureBgpPeer(String localAs, BgpConfig bgp){
+		router.getVty().send("configure terminal");
+		router.getVty().send("router bgp "+ localAs );
+		router.getVty().send("neighbor " +bgp.getRouterId() + " remote-as "+bgp.getAsn());
+		router.getVty().send("neighbor " +bgp.getRouterId() + " " + bgp.getEbgpHop());
+		router.getVty().send("address-family ipv4");
+		router.getVty().send("neighbor " +bgp.getRouterId() + " activate");
+		router.getVty().send("address-family ipv6");
+		router.getVty().send("neighbor " +bgp.getRouterId() + " activate");
+		router.getVty().send("end");	
+	}
+	
+	
+	public void removeBgpPeer(String localAs, BgpConfig bgp){
+		router.getVty().send("configure terminal");
+		router.getVty().send("router bgp "+ localAs );
+		router.getVty().send("no neighbor " +bgp.getRouterId() + " remote-as "+bgp.getAsn());
+		router.getVty().send("end");	
+	}
+	
+	
+	public void configureNtpPeer(NtpConfig ntp){
+		router.getVty().send("configure terminal");
+		router.getVty().send("ntp peer " + ntp.getNtpAddress() + " version 4");
+		router.getVty().send("end");
+	}
+	
+	public void removeNtpPeer(NtpConfig ntp){
+		router.getVty().send("configure terminal");
+		router.getVty().send("no ntp peer " + ntp.getNtpAddress() + " version 4");
+		router.getVty().send("end");
+	}
+	
+	public void configureTunnel(Peer peer){
+		router.getVty().send("configure terminal");
+		router.getVty().send("interface tunnel"+peer.getTunnelInterface().getInterfaceName());
+		if(peer.getTunnelInterface().getInterfaceAddress()!=null){
+			router.getVty().send("ip address " + peer.getTunnelInterface().getInterfaceAddress().toString());
+		}
+		router.getVty().send("ipv6 enable");
+		router.getVty().send("tunnel source "+peer.getLocalInterfaceIp());
+		router.getVty().send("tunnel destination "+peer.getRemoteInterfaceIp());
+		router.getVty().send("end");
+	}
+	
+	public void removeTunnel(Peer peer){
+		router.getVty().send("configure terminal");
+		router.getVty().send("no interface tunnel "+peer.getTunnelInterface().getInterfaceName());
+		router.getVty().send("end");
+	}
+	
+	public void configureMsdpPeer(MsdpConfig config, String loopbackinterface){
+		router.getVty().send("configure terminal");
+		router.getVty().send("ip msdp peer " + config.getPeerAddress() + " connect-source " + loopbackinterface);
+		router.getVty().send("end");
+	}
+	
+	public void removeMsdpPeer(MsdpConfig config){
+		router.getVty().send("configure terminal");
+		router.getVty().send("no ip msdp peer " + config.getPeerAddress());
+		router.getVty().send("end");
+	}
+
 
 	// public static void main(String[] args) {
 	// VtyRouterDAO vty = new VtyRouterDAO(new Router());
@@ -185,7 +253,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	// + "* GigabitEthernet0/2 0 0 0 0 0 0 0 0 0"
 	// + "* Loopback200 0 0 0 0 0 0 0 0 0"
 	// + "* NVI0 0 0 0 0 0 0 0 0 0")) {
-	// System.out.println("found: "+s);
+	// logger.info("found: "+s);
 	// }
 	// }
 

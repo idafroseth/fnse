@@ -90,4 +90,11 @@ public class InterfaceAddress {
 		this.netmask = netmask;
 	}
 
+	@Override
+	public String toString(){
+		if(ip != null){
+			return ip.toString().substring(1) + " " +netmask;
+		}
+		return null;
+	}
 }

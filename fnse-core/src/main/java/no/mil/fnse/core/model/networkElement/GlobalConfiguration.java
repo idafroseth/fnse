@@ -3,6 +3,7 @@ package no.mil.fnse.core.model.networkElement;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -66,7 +67,7 @@ public class GlobalConfiguration {
 		this.name = name;
 	}
 	
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "BGPCONFIG_ID")
 	public BgpConfig getBgpConfig() {
 		return bgpConfig;
@@ -77,7 +78,7 @@ public class GlobalConfiguration {
 		this.bgpConfig = bgpConfig;
 	}
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "NTPCONFIG_ID")
 	public NtpConfig getNtpConfig() {
 		return ntpConfig;
@@ -88,7 +89,7 @@ public class GlobalConfiguration {
 		this.ntpConfig = ntpConfig;
 	}
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinColumn(name = "MSDPCONFIG_ID")
 	public MsdpConfig getMsdpConfig() {
 		return msdpConfig;

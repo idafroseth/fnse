@@ -33,7 +33,6 @@ import no.mil.fnse.core.repository.PeerDAO;
 import no.mil.fnse.core.repository.RouterDAO;
 import no.mil.fnse.core.repository.SDNControllerDAO;
 import no.mil.fnse.core.repository.SystemConfigurationDAO;
-import no.mil.fnse.core.repository.hibernate.HibernateInterfaceAddressDAO;
 
 @Transactional
 @Component("defaultreposervice")
@@ -71,10 +70,11 @@ public class RepositoryServiceImpl implements RepositoryService{
 	@Autowired
 	private SessionFactory sessionFactory;
 	
+	@Transactional 
 	@Override
 	public int addPeer(Peer peer) {
-		if(peer.getLocalInterfaceIp() == null || peer.getRemoteInterfaceIp()==null){
-			logger.error("Trying to save peer put the local or remote ip is not set...");
+		if(peer.getLocalInterfaceIp() == null || peer.getRemoteInterfaceIp()==null || peer.getRouter() ==null){
+			logger.error("Trying to save peer put the local or remote ip is not set or the router is null...");
 			return 0;
 		}
 		if (hibernatePeerDAO.getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp()) != null) {
@@ -83,7 +83,7 @@ public class RepositoryServiceImpl implements RepositoryService{
 		}
 		return hibernatePeerDAO.savePeer(peer);
 	}
-
+	
 	@Transactional 
 	public void updatePeer(int peerId, Timestamp deadTime, PeerStatus status, NetworkInterface tunnel ){
 		Peer peerToChange  = hibernatePeerDAO.getPeer(peerId);
@@ -99,13 +99,22 @@ public class RepositoryServiceImpl implements RepositoryService{
 	}
 	
 	@Transactional
+	@Override
 	public Peer getPeerByIp(InetAddress localIp, InetAddress remoteIp){
 		if(localIp == null || remoteIp == null){
+			logger.error("getPeer but local: "+localIp+" or remote: "+remoteIp+" ip was null");
 			return null;
 		}
 		
 		return hibernatePeerDAO.getPeerByIp(localIp, remoteIp);
 	}
+	
+	@Transactional
+	@Override
+	public Collection<Peer> getAllDeadPeers(Timestamp currentTime){
+		return hibernatePeerDAO.getAllDeadPeers(currentTime);
+	}
+
 
 	
 	@Override
@@ -263,6 +272,8 @@ public class RepositoryServiceImpl implements RepositoryService{
 		return hibernateInterfaceAddressDAO.getInterfaceAddressByIp(ip);
 	}
 	
+	@Override
+	@Transactional
 	public Router getRouterByLocalIp(InetAddress ip){
 		
 		NetworkInterface ne = getNetworkInterfaceByAddress(getInterfaceAddressByIp(ip));
@@ -290,6 +301,7 @@ public class RepositoryServiceImpl implements RepositoryService{
 	}
 	
 	@Override
+	@Transactional 
 	public void addNetworkInterfaceToRouter(int routerId, int neId) {
 		Router routerToUpdate = hibernateRouterDAO.getRouter(routerId);
 		if (routerToUpdate == null || hibernateNetworkInterface.getNetworkInterface(neId) == null) {
@@ -325,18 +337,21 @@ public class RepositoryServiceImpl implements RepositoryService{
 	}
 
 	@Override
+	@Transactional 
 	public int addBgpConfiguration(BgpConfig bgpConfig) {
 		// TODO Auto-generated method stub
 		return hibernateBgpConfigDAO.saveBgpConfig(bgpConfig);
 	}
 
 	@Override
-	@Transactional public void delBgpConfiguration(int bgpConfigId) {
+	@Transactional 
+	public void delBgpConfiguration(int bgpConfigId) {
 		// TODO Auto-generated method stub
 		//First remove all link from global config to this one before we delete it!!
 	}
 
 	@Override
+	@Transactional 
 	public BgpConfig getBgpConfiguration(int bgpConfigId) {
 		return hibernateBgpConfigDAO.getBgpConfig(bgpConfigId);
 	}
@@ -396,6 +411,7 @@ public class RepositoryServiceImpl implements RepositoryService{
 	}
 
 	@Override
+	@Transactional 
 	public int addNetworkInterface(NetworkInterface ne) {
 		InterfaceAddress ia = hibernateInterfaceAddressDAO.getInterfaceAddressByIp(ne.getInterfaceAddress().getIp());
 		if(ia == null){

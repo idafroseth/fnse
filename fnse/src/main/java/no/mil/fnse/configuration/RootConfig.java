@@ -2,8 +2,6 @@ package no.mil.fnse.configuration;
 
 import java.beans.PropertyVetoException;
 import java.util.Properties;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -97,9 +95,18 @@ public class RootConfig implements SchedulingConfigurer {
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 		taskRegistrar.setScheduler(taskExecutor());
 	}
-
+ 
+//	@Bean(destroyMethod = "shutdown")
+//	public Executor taskExecutor() {
+//		return Executors.newScheduledThreadPool(10);
+//	}
+//	
 	@Bean(destroyMethod = "shutdown")
-	public Executor taskExecutor() {
-		return Executors.newScheduledThreadPool(10);
+	public ThreadPoolTaskExecutor taskExecutor() {
+		ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+		pool.setCorePoolSize(5);
+		pool.setMaxPoolSize(10);
+		pool.setQueueCapacity(25);
+		return pool;
 	}
 }
