@@ -8,12 +8,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.repository.NetworkInterfaceDAO;
 
-@Component("hibernateNetworkInterfaceDAO")
+@Repository("hibernateNetworkInterfaceDAO")
 public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 	static Logger logger = Logger.getLogger(HibernateNetworkInterfaceDAO.class);
 
@@ -30,7 +31,8 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 
 	public int saveNetworkInterface(NetworkInterface networkInterface) {
 		try {
-			if (getNetworkInterfaceByAddress(networkInterface.getInterfaceAddress()) == null) {
+			System.out.println("Trying to check if the NE is already saved");
+			if (getNetworkInterfaceByName(networkInterface.getInterfaceName()) == null) {
 				int id = (Integer) sessionFactory.getCurrentSession().save(networkInterface);
 				logger.info("New networkInterface added to db: " + networkInterface.getInterfaceAddress());
 				return id;
@@ -38,7 +40,8 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 				return -1;
 			}
 		} catch (RuntimeException re) {
-			logger.error("Attached failed" + re);
+			logger.error("Attached failed when saving NetworkInterface " + re);
+			re.printStackTrace();
 			return -1;
 		}
 	}
@@ -50,6 +53,21 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 			return (NetworkInterface) criteria.uniqueResult();
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
+			re.printStackTrace();
+			return null;
+		}
+	}
+
+
+	@Override
+	public NetworkInterface getNetworkInterfaceByName(String interfaceName) {
+		try {
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(NetworkInterface.class);
+			criteria.add(Restrictions.eq("interfaceName", interfaceName));
+			return (NetworkInterface) criteria.uniqueResult();
+		} catch (RuntimeException re) {
+			logger.error("Attached failed" + re);
+			re.printStackTrace();
 			return null;
 		}
 	}
@@ -60,6 +78,7 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 			return (NetworkInterface) sessionFactory.getCurrentSession().get(NetworkInterface.class, id);
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
+			re.printStackTrace();
 			return null;
 		}
 	}
@@ -70,6 +89,7 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 			return sessionFactory.getCurrentSession().createQuery("FROM NetworkInterface order by id").list();
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
+			re.printStackTrace();
 			return null;
 		}
 	}
@@ -79,6 +99,7 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 			sessionFactory.getCurrentSession().delete(networkInterface);
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
+			re.printStackTrace();
 		}
 	}
 
@@ -92,7 +113,8 @@ public class HibernateNetworkInterfaceDAO implements NetworkInterfaceDAO {
 			sessionFactory.getCurrentSession().update(ifToChange);
 		}catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
-
+			re.printStackTrace();
+ 
 		}
 		
 	}

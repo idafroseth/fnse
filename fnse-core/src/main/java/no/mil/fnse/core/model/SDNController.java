@@ -1,6 +1,7 @@
 package no.mil.fnse.core.model;
 
 import java.util.Collection;
+import java.util.Collection;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -73,12 +74,12 @@ public class SDNController {
 	}
 
 	// -------------------------------------------------------------------------
-    // Setters and getters
+    // Collectionters and getters
     // -------------------------------------------------------------------------
 
 	@Id
 	@GeneratedValue
-	@Column(name = "CONTROLLER_ID", unique = true, nullable = false)
+	@Column(unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -88,7 +89,7 @@ public class SDNController {
 	}
 
 	@Basic(optional = false)
-	@Column(name = "CONTROLLER_IP", unique = true, nullable = false)
+	@Column(unique = true, nullable = false)
 	public String getIpAddress() {
 		return ipAddress;
 	}
@@ -96,7 +97,7 @@ public class SDNController {
 		this.ipAddress = ipAddress;
 	}
 	
-	@Column(name = "ENTITY_ID")
+	@Column
 	public int getEntityId() {
 		return entityId;
 	}
@@ -104,7 +105,7 @@ public class SDNController {
 		this.entityId = entityId;
 	}
 	
-	@Column(name = "HELLO_INTERVAL")
+	@Column
 	public int getHelloInterval() {
 		return helloInterval;
 	}
@@ -112,7 +113,7 @@ public class SDNController {
 		this.helloInterval = helloInterval;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "controller")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "controller")
 	public Collection<Peer> getPeers() {
 		return peers;
 	}

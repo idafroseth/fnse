@@ -11,11 +11,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.repository.InterfaceAddressDAO;
 
-@Component("hibernateInterfaceAddressDAO")
+@Repository("hibernateInterfaceAddressDAO")
 public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 	static Logger logger = Logger.getLogger(HibernateInterfaceAddressDAO.class);
 
@@ -30,12 +31,13 @@ public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 		this.sessionFactory = session;
 	}
 
-	@Transactional
+	
 	public int saveInterfaceAddress(InterfaceAddress interfaceAddress) {
 		try {
 			if (getInterfaceAddressByIp(interfaceAddress.getIp()) == null) {
 				int id = (Integer) sessionFactory.getCurrentSession().save(interfaceAddress);
 				logger.info("New interfaceAddress added to db: " + interfaceAddress.getIp());
+//				sessionFactory.getCurrentSession().flush();
 				return id;
 			} else {
 				return -1;
@@ -46,7 +48,7 @@ public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 		}
 	}
 
-	@Transactional
+	
 	public InterfaceAddress getInterfaceAddressByIp(InetAddress ip) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(InterfaceAddress.class);
@@ -58,8 +60,6 @@ public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 		}
 	}
 	
-
-	@Transactional
 	public InterfaceAddress getInterfaceAddress(int id) {
 		try {
 			return (InterfaceAddress) sessionFactory.getCurrentSession().get(InterfaceAddress.class, id);
@@ -70,7 +70,6 @@ public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 	}
 
 	@SuppressWarnings("unchecked")
-	@Transactional
 	public Collection<InterfaceAddress> getAllInterfaceAddresss() {
 		try {
 			return sessionFactory.getCurrentSession().createQuery("FROM InterfaceAddress order by id").list();
@@ -80,7 +79,7 @@ public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 		}
 	}
 
-	@Transactional
+	
 	public void delInterfaceAddress(InterfaceAddress interfaceAddress) {
 		try {
 			sessionFactory.getCurrentSession().delete(interfaceAddress);
@@ -89,7 +88,7 @@ public class HibernateInterfaceAddressDAO implements InterfaceAddressDAO{
 		}
 	}
 
-	@Transactional
+	
 	public void updateInterfaceAddress(InterfaceAddress interfaceAddress) {
 		try{
 			InterfaceAddress ifAdrToChange = getInterfaceAddressByIp(interfaceAddress.getIp());

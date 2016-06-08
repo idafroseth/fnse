@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * 
  * @author Ida Marie Frøseth
@@ -21,14 +23,21 @@ import org.apache.log4j.Logger;
 @Entity
 @Table(name="networkinterface")
 public class NetworkInterface {
+	@JsonIgnore
 	private int id;
+	
 	private InterfaceAddress interfaceAddress;
+	
 	private InterfaceAddress ipv6Address;
+	@JsonIgnore
 	private String description;
+	@JsonIgnore
 	private String interfaceName;
 //	
+	@JsonIgnore
 	private Router router;
 //	
+	@JsonIgnore
 	static Logger logger = Logger.getLogger(NetworkInterface.class);
 	
 	
@@ -79,7 +88,7 @@ public class NetworkInterface {
     // -------------------------------------------------------------------------
 	
     @Id
-	@Column(name = "NETWORKINTERFACE_ID", unique = true, nullable = false)
+	@Column( unique = true, nullable = false)
     @GeneratedValue
 	public int getId() {
 		return id;
@@ -88,7 +97,8 @@ public class NetworkInterface {
 	public void setId(int id) {
 		this.id = id;
 	}
-	@Column(name="IF_NAME")
+	
+	@Column(name="interfacename")
 	public String getInterfaceName() {
 		return interfaceName;
 	}
@@ -96,8 +106,8 @@ public class NetworkInterface {
 		this.interfaceName = ifName;
 	}
 	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name="INTERFACE_ADDRESS_ID")
+	@OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn
 	public InterfaceAddress getInterfaceAddress() {
 		return interfaceAddress;
 	}
@@ -114,7 +124,7 @@ public class NetworkInterface {
 		this.ipv6Address = ipv6Address;
 	}
 	
-	@Column(name = "NE_DESCRIPTION")
+	@Column
 	public String getDescription() {
 		return description;
 	}
@@ -123,7 +133,7 @@ public class NetworkInterface {
 	}
 	
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "ROUTER_ID", nullable = false)
+	@JoinColumn(nullable = false)
 	public Router getRouter() {
 		return router;
 	}

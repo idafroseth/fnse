@@ -5,8 +5,10 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 import javax.annotation.PostConstruct;
@@ -85,8 +87,8 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 		while(true){
 			try {
 				serverSocket.send(helloPacket);
-				logger.info("Sending HELLO  ");
-				Thread.sleep(10*1000);//systemConfiguration.getNationalController().getHelloInterval()*1000);
+				logger.debug("Sending HELLO  ");
+				Thread.sleep(systemConfiguration.getNationalController().getHelloInterval()*1000);
 	
 			} catch (IOException | InterruptedException re) {
 				logger.error("Attached failed" + re);
@@ -97,11 +99,10 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 
 	@Async
 	public void listenHello() {
-
-		logger.info("***********STARTING TO Listen for HELLO!!!");
+		logger.debug("***********STARTING TO Listen for HELLO!!!");
 		byte[] buf = new byte[47];
 		while (true) {
-			logger.info("LISTENING");
+			logger.debug("LISTENING");
 
 			// Receive the information
 			DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
@@ -116,9 +117,9 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 				SDNController ctrl = mapper.readValue(msg, SDNController.class);
 
 				if (ctrl.getEntityId() != systemConfiguration.getNationalController().getEntityId()) {
-					logger.info("Found neighbor with id " + ctrl.getEntityId() + " Message was " + msg);
+					logger.debug("Found neighbor with id " + ctrl.getEntityId() + " Message was " + msg);
 
-					helloReceived(ctrl, msgPacket.getAddress());
+					helloReceived(ctrl, msgPacket.getAddress().toString().substring(1));
 				}
 
 			} catch (IOException re) {
@@ -128,7 +129,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 
 	}
 
-	private void helloReceived(SDNController ctrl, InetAddress remoteIp)
+	private void helloReceived(SDNController ctrl, String remoteIp)
 			throws JsonParseException, JsonMappingException, IOException {
 
 		Peer neighbor = new Peer();
@@ -152,10 +153,17 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 	private void persistPeer(Peer neighbor) {
 		defaultreposervice.addSdnController(neighbor.getController());
 		neighbor.setStatus(PeerStatus.DISCOVERED);
-		neighbor.setRouter(defaultreposervice.getRouterByLocalIp(neighbor.getLocalInterfaceIp()));
+		try {
+			neighbor.setRouter(defaultreposervice.getRouterByLocalIp(InetAddress.getByName(neighbor.getLocalInterfaceIp())));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			logger.error("Could not find a router attached to the peer: ");
+			e.printStackTrace();
+		
+		}
 		neighbor.setId(defaultreposervice.addPeer(neighbor));
 		if (neighbor.getId() == 0) {
-			logger.info("DiscoveryServiceImpl.discoverdNeighbor Trying to add the correct router but it is null ");
+			logger.error("DiscoveryServiceImpl.discoverdNeighbor Trying to add the correct router but it is null ");
 			return;
 		}
 		configurationQueue.add(neighbor);
@@ -166,24 +174,31 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 		// sette den som discovered
 
 		if (peerInDB.getStatus().equals(PeerStatus.DEAD)) {
-			peerInDB.setStatus(PeerStatus.DISCOVERED);
+			neighbor.setStatus(PeerStatus.DISCOVERED);
 		} else {
-			logger.info("Setting the status to: " + peerInDB.getStatus());
-			peerInDB.setStatus(peerInDB.getStatus());
+			logger.debug("Setting the status to: " + peerInDB.getStatus());
+			neighbor.setStatus(peerInDB.getStatus());
 		}
-		logger.info("Trying to update: " + peerInDB.getId());
-		defaultreposervice.updatePeer(peerInDB.getId(), neighbor.getDeadTime(), neighbor.getStatus(), null);
+		logger.debug("Trying to update: " + peerInDB.getId());
+		
+		defaultreposervice.updatePeer(neighbor);
 	}
 
 	@Async
 	@Override
 	public void checkDeadPeer() {
+
 		while (true) {
 			logger.debug("***********STARTING TO CHECK FOR DEAD PEERS!!!");
 			Collection<Peer> deadPeers = defaultreposervice.getAllDeadPeers(new Timestamp(System.currentTimeMillis()));
 			logger.info("Dead peers: " + deadPeers);
 			for (Peer dead : deadPeers) {
-				defaultreposervice.updatePeer(dead.getId(), null, PeerStatus.DEAD, null);
+				if(dead.getStatus()== PeerStatus.DEAD){
+					continue;
+				}
+				dead.setStatus(PeerStatus.DEAD);
+				defaultreposervice.updatePeer(dead);
+				logger.info("Found dead peer " + dead.getRemoteInterfaceIp());
 				deadQueue.add(dead);
 			}
 			try {
@@ -194,13 +209,19 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 		}
 	}
 
-	private InetAddress findLocalIp(InetAddress remoteIp) {
+	private String findLocalIp(String remoteIp) {
 		for (Router router : systemConfiguration.getNationalRouters()) {
-			logger.info("Trying to fetch the local ip");
-			vtyRouterDAO.setRouter(router);
-			InetAddress localIp;
+			logger.debug("Trying to fetch the local ip");
+			if(vtyRouterDAO.getRouter()!= router){
+				vtyRouterDAO.setRouter(router);
+			}
+			String localIp;
 			try {
-				localIp = vtyRouterDAO.getIpMrouteSource(group.toString().substring(1), remoteIp);
+				InetAddress ip =  vtyRouterDAO.getIpMrouteSource(group.toString().substring(1), remoteIp);
+				if(ip == null){
+					return null;
+				}
+				localIp = ip.toString().substring(1);
 			} catch (SouthboundException e) {
 				logger.error("AttachedFailed " + e);
 				e.printStackTrace();
@@ -214,6 +235,10 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 		logger.error("Could not find localIp...");
 		return null;
 	}
+	
+	///////////////////////
+	// GETTERS AND SETTERS
+	///////////////////////
 
 	@Override
 	public void setGroup(InetAddress group) {

@@ -1,7 +1,9 @@
 package no.mil.fnse.core.model.networkElement;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.List;
+import java.util.Collection;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -41,7 +43,7 @@ public class Router {
 	
 	private GlobalConfiguration globalConfiguration;
 
-	private List<NetworkInterface> networkInterfaces;
+	private Collection<NetworkInterface> networkInterfaces;
 	
 	private boolean national;
 	
@@ -103,7 +105,7 @@ public class Router {
 	}
 
 	// -------------------------------------------------------------------------
-    // Setters and getters
+    // Collectionters and getters
     // -------------------------------------------------------------------------
 	
 
@@ -126,7 +128,7 @@ public class Router {
 	public void setManagementIp(InetAddress managementIp) {
 		this.managementIp = managementIp;
 	}
-
+	
 	@Transient
 	public ExternalCommunication getVty() {
 		return vty;
@@ -140,7 +142,7 @@ public class Router {
 		this.username = username;
 	}
 
-	@Column(name = "ROUTER_USERNAME")
+	@Column
 	public String getUsername() {
 		return this.username;
 	}
@@ -149,13 +151,13 @@ public class Router {
 		this.password = password;
 	}
 	
-	@Column(name = "ROUTER_PASSWORD")
+	@Column
 	public String getPassword() {
 		return this.password;
 	}
 	
 	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "GLOBAL_CONFIG")
+	@JoinColumn
 	public GlobalConfiguration getGlobalConfiguration() {
 		return globalConfiguration;
 	}
@@ -165,15 +167,15 @@ public class Router {
 	}
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "router")
-	public List<NetworkInterface> getNetworkInterfaces() {
+	public Collection<NetworkInterface> getNetworkInterfaces() {
 		return networkInterfaces;
 	}
 
-	public void setNetworkInterfaces(List<NetworkInterface> networkInterfaces) {
+	public void setNetworkInterfaces(Collection<NetworkInterface> networkInterfaces) {
 		this.networkInterfaces = networkInterfaces;
 	}
 
-	@Column(name="ROUTER_NATIONAL")
+	@Column
 	public boolean isNational() {
 		return national;
 	}

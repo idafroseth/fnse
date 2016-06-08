@@ -87,6 +87,7 @@ public class RootConfig implements SchedulingConfigurer {
 				setProperty("hibernate.hbm2ddl.auto", "create-drop");
 				setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
 				setProperty("hibernate.globally_quoted_identifiers", "true");
+//				setProperty("hibernate.enable_lazy_load_no_trans","true");
 			}
 		};
 	}

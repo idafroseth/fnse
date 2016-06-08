@@ -63,7 +63,7 @@ public class InterfaceAddress {
 	}
 	@Id
 	@GeneratedValue
-	@Column(name = "INTERFACEADDRESS_ID", unique = true, nullable = false)
+	@Column( unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -72,7 +72,7 @@ public class InterfaceAddress {
 		this.id = id;
 	}
 
-	@Column(name = "IP_ADDRESS")
+	@Column
 	public InetAddress getIp() {
 		return ip;
 	}
@@ -81,7 +81,7 @@ public class InterfaceAddress {
 		this.ip = ip;
 	}
 	
-	@Column(name = "NETMASK")
+	@Column
 	public String getNetmask() {
 		return netmask;
 	}

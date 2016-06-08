@@ -10,11 +10,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.repository.GlobalConfigurationDAO;
 
-@Component("hibernateGlobalConfigurationDAO")
+@Repository("hibernateGlobalConfigurationDAO")
 public class HibernateGlobalConfigurationDAO implements GlobalConfigurationDAO {
 	static Logger logger = Logger.getLogger(HibernateGlobalConfigurationDAO.class);
 

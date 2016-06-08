@@ -24,5 +24,9 @@ public interface ExternalCommunication {
 	 */
 	void close();
 	
-	boolean isConnected();
+	/**
+	 * Check if the session is open
+	 * @return
+	 */
+	boolean isOpen();
 }

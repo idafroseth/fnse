@@ -1,7 +1,7 @@
 package no.mil.fnse.core.model;
 
 import java.net.InetAddress;
-import java.util.List;
+import java.util.Collection;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -31,11 +31,11 @@ public class SystemConfiguration {
 	SDNController nationalController;
 	
 	@JsonProperty("network_elements")
-	List<Router> networkElements;
+	Collection<Router> networkElements;
 	
 	@Id
 	@GeneratedValue
-	@Column(name = "CONFIG_ID", unique = true, nullable = false)
+	@Column(unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -45,7 +45,7 @@ public class SystemConfiguration {
 	}
 	
 	@Basic(optional = false)
-	@Column(name = "HELLO_MCASTGROUP")
+	@Column(name = "discoverymulticastgroup")
 	public InetAddress getDiscoveryMulticastGroup() {
 		return discoveryMulticastGroup;
 	}
@@ -53,7 +53,7 @@ public class SystemConfiguration {
 		this.discoveryMulticastGroup = multicastGroup;
 	}
 	
-	@Column(name = "HELLO_PORT")
+	@Column(name = "helloport")
 	public int getHelloPort() {
 		return helloPort;
 	}
@@ -62,7 +62,7 @@ public class SystemConfiguration {
 	}
 	
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CONTROLLER_ID")
+    @JoinColumn
 	public SDNController getNationalController() {
 		return nationalController;
 	}
@@ -71,11 +71,11 @@ public class SystemConfiguration {
 	}
 	
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "ROUTER_ID")
-	public List<Router> getNetworkElements() {
+    @JoinColumn
+	public Collection<Router> getNetworkElements() {
 		return networkElements;
 	}
-	public void setNetworkElements(List<Router> networkElements) {
+	public void setNetworkElements(Collection<Router> networkElements) {
 		this.networkElements = networkElements;
 	}
 }

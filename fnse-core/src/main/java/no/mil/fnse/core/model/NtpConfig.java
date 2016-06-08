@@ -27,7 +27,7 @@ public class NtpConfig {
 
 	@Id
 	@GeneratedValue
-	@Column(name = "NTPCONFIG_ID", unique = true, nullable = false)
+	@Column(unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -36,7 +36,7 @@ public class NtpConfig {
 		this.id = id;
 	}
 
-	@Column(name="NTP_ADDRESS", nullable=false)
+	@Column( nullable=false)
 	public String getNtpAddress() {
 		return ntpAddress;
 	}
@@ -45,7 +45,7 @@ public class NtpConfig {
 		this.ntpAddress = ntpAddress;
 	}
 
-	@Column(name="NTP_STRATUM")
+	@Column
 	public String getStratum() {
 		return stratum;
 	}

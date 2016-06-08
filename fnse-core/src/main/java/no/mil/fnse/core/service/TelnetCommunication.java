@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 
+import javax.persistence.Entity;
+
 import org.apache.commons.net.telnet.TelnetClient;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -69,7 +71,7 @@ public class TelnetCommunication implements ExternalCommunication {
         try { 
             write(command); 
             readUntil(command);//Read past the command
-            String result = readUntil(prompt); 
+            String result = readUntil(prompt);
             return result; 
         } catch (IOException e) { 
             logger.error(e); 
@@ -88,7 +90,7 @@ public class TelnetCommunication implements ExternalCommunication {
         } 
     } 
     
-    public boolean isConnected(){
+    public boolean isOpen(){
     	return telnetSocket.isConnected();
     }
 	
@@ -99,22 +101,25 @@ public class TelnetCommunication implements ExternalCommunication {
      */ 
     private String readUntil(String pattern) throws IOException { 
         char lastChar = pattern.charAt(pattern.length() - 1); 
+        char moreChar = "-".charAt(0);
         StringBuilder sb = new StringBuilder(); 
         int c; 
  
         while((c = in.read()) != -1) { 
             char ch = (char) c; 
-            logger.debug(ch); 
             sb.append(ch); 
-            if(ch == lastChar) { 
+            if(ch == lastChar || ch == moreChar) { 
                 String str = sb.toString(); 
                 if(str.endsWith(pattern)) { 
                 	logger.debug(str.substring(0, str.length() -  pattern.length()));
                     return str.substring(0, str.length() -  pattern.length()); 
                 } 
+                if(str.endsWith("--More--")){
+                	logger.info("found more promt!!");
+                	write(" ");
+                }
             } 
         } 
- 
         return null; 
     } 
     
@@ -124,7 +129,7 @@ public class TelnetCommunication implements ExternalCommunication {
     private void write(String value) { 
         out.println(value); 
         out.flush(); 
-        //logger.debug(value); 
+        logger.debug(value); 
     }
     
 

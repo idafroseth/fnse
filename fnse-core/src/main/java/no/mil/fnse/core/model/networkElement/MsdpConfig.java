@@ -1,6 +1,7 @@
 package no.mil.fnse.core.model.networkElement;
 
 import java.util.Collection;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -63,12 +64,12 @@ public class MsdpConfig {
 	}
 
 	// -------------------------------------------------------------------------
-    // Setters and getters
+    // Collectionters and getters
     // -------------------------------------------------------------------------
 	
     @Id
 	@GeneratedValue
-	@Column(name = "MSDPCONFIG_ID", unique = true, nullable = false)
+	@Column( unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -79,7 +80,7 @@ public class MsdpConfig {
 	
 
 
-	@Column(name="PEER_ADDRESS", nullable=false)
+	@Column(name="peer_address", nullable=false)
 	public String getPeerAddress() {
 		return peerAddress;
 	}

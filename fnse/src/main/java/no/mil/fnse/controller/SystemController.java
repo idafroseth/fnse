@@ -27,6 +27,7 @@ public class SystemController {
 		System.out.println("STARTING THE DISCOVERY SERVICE");
 		discoveryService.sendHello();
 		discoveryService.listenHello();
+//		discoveryService.checkDeadPeer();
 	
 		System.out.println("STARTING THE AUTOCONF SERVICE");
 		autoconfigurationService.removeDeadPeers();

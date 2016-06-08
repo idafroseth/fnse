@@ -35,8 +35,6 @@ public class AutoconfigurationController {
 
 	@Autowired
 	SystemConfiguration systemConfiguration;
-	
-	private LinkedList<NetworkInterface> grePool;
 
 	
 	static Logger logger = Logger.getLogger(AutoconfigurationController.class);
@@ -51,9 +49,13 @@ public class AutoconfigurationController {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/api/configuration/local/{localIp}/{remoteIp}")
-	public LocalConfiguration getLocalConfiguration(@PathVariable String remoteIp, @PathVariable String localIp) {
-		logger.info("Trying to access the global configuration of local: " + localIp);
-		return defaultAutoconfService.getLocalConfiguration(localIp, remoteIp);
+	public LocalConfiguration getLocalConfiguration( @PathVariable String localIp,@PathVariable String remoteIp) {
+		logger.info("Trying to access the configuration of local: " + localIp + ", " + remoteIp);
+		LocalConfiguration localConfig = defaultAutoconfService.getLocalConfiguration(localIp, remoteIp);
+		if(localConfig == null){
+			return new LocalConfiguration();
+		}
+		return localConfig;
 	}
 
 	/**
@@ -66,7 +68,7 @@ public class AutoconfigurationController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/api/configuration/local/{localIp}/{remoteIp}/gre")
 	public TunnelInterface getGreConfiguration(@PathVariable String remoteIp, @PathVariable String localIp) {
-		logger.info("Trying to access the global configuration of local: " + localIp);
+		logger.info("Trying to  access the GRE tunnel interface of: " + localIp);
 		return defaultAutoconfService.getTunnelInterface(localIp, remoteIp);
 	}
 
@@ -74,7 +76,7 @@ public class AutoconfigurationController {
 			RequestMethod.POST }, value = "/api/configuration/local/{localIp}/{remoteIp}/gre")
 	public TunnelInterface setGreConfiguration(@PathVariable String remoteIp, @PathVariable String localIp,
 			@RequestBody TunnelInterface config) {
-		logger.debug("Trying to configure the GRE tunnel interface address " + localIp);
+		logger.debug("Trying to POST access the GRE tunnel interface of " + localIp);
 		return defaultAutoconfService.setTunnelInterface(localIp, remoteIp, config);
 	}
 

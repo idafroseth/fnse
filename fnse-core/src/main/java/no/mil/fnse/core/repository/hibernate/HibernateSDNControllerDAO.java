@@ -2,20 +2,18 @@ package no.mil.fnse.core.repository.hibernate;
 
 import java.util.Collection;
 
-import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.repository.SDNControllerDAO;
 
-@Transactional
-@Component("hibernateSDNControllerDAO")
+@Repository("hibernateSDNControllerDAO")
 public class HibernateSDNControllerDAO implements SDNControllerDAO{
 	static Logger logger = Logger.getLogger(HibernateSDNControllerDAO.class);
 	
@@ -29,7 +27,6 @@ public class HibernateSDNControllerDAO implements SDNControllerDAO{
 		this.sessionFactory = session;
 	}
 	
-	@Transactional
 	public int saveSDNController(SDNController controller) {
 		try{
 			if(getSDNControllerByIp(controller.getIpAddress())==null){
@@ -46,7 +43,6 @@ public class HibernateSDNControllerDAO implements SDNControllerDAO{
 	}
 
 
-	@Transactional
 	public SDNController getSDNController(int id) {
 		try {
 			return (SDNController) sessionFactory.getCurrentSession().get(SDNController.class, id);
@@ -56,7 +52,6 @@ public class HibernateSDNControllerDAO implements SDNControllerDAO{
 		}
 	}
 
-	@Transactional
 	public SDNController getSDNControllerByIp(String ip) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(SDNController.class);
@@ -68,17 +63,15 @@ public class HibernateSDNControllerDAO implements SDNControllerDAO{
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<SDNController> getAllSDNControllers() {
 		try {
-			return sessionFactory.getCurrentSession().createQuery("FROM SDNController order by id").list();
+			return  sessionFactory.getCurrentSession().createQuery("FROM SDNController order by id").list();
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
 			return null;
 		}
 	}
 
-	@Transactional
 	public void delSDNController(SDNController controller) {
 		try {
 			sessionFactory.getCurrentSession().delete(controller);

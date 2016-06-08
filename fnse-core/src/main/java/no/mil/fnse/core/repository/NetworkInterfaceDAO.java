@@ -29,6 +29,8 @@ public interface NetworkInterfaceDAO {
 	 */
 	NetworkInterface getNetworkInterfaceByAddress(InterfaceAddress interfaceAddress);
 	
+	NetworkInterface getNetworkInterfaceByName(String name);
+	
 	/**
 	 * Returns all the NetworkInterfaces in the database
 	 * @return the collection of all networkInterfaces or null no one exists

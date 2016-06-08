@@ -19,14 +19,14 @@ public  interface RouterSouthboundDAO {
 	void setRouter(Router router);
 	
 
-	void configureBgpPeer(String localAsn, BgpConfig bgpPeer);
-	void removeBgpPeer(String localAsn, BgpConfig bgpPeer);
-	void configureNtpPeer(NtpConfig ntpPeer);
-	void removeNtpPeer(NtpConfig ntpPeer);
-	void configureTunnel(Peer peer);
-	void removeTunnel(Peer Peer);
-	void configureMsdpPeer(MsdpConfig config, String loopbackinterface);
-	void removeMsdpPeer(MsdpConfig config);
+	void configureBgpPeer(String localAsn,String updateSource, BgpConfig bgpPeer) throws SouthboundException;
+	void removeBgpPeer(String localAsn, BgpConfig bgpPeer) throws SouthboundException;
+	void configureNtpPeer(NtpConfig ntpPeer) throws SouthboundException;
+	void removeNtpPeer(NtpConfig ntpPeer) throws SouthboundException;
+	void configureTunnel(Peer peer) throws SouthboundException;
+	void removeTunnel(String interfaceName) throws SouthboundException;
+	void configureMsdpPeer(MsdpConfig config, String loopbackinterface) throws SouthboundException;
+	void removeMsdpPeer(MsdpConfig config) throws SouthboundException;
 	
 	
 //	/**
@@ -54,7 +54,7 @@ public  interface RouterSouthboundDAO {
 	 * Query the networking element for the multicast routing table
 	 * @return a list of IPaddresses of remote peer and interface of local peer
 	 */
-	InetAddress getIpMrouteSource(String multicastGroup ,InetAddress remotePeer) throws SouthboundException;
+	InetAddress getIpMrouteSource(String multicastGroup ,String remotePeer) throws SouthboundException;
 	
 	/**
 	 * show ip bgp summary
@@ -69,6 +69,7 @@ public  interface RouterSouthboundDAO {
 	
 	void configureStaticRoute(InetAddress ipNetwork, String netmask, String nextHop) throws SouthboundException;
 	
+	void removeStaticRoute(InetAddress ipNetwork, String netmask, String nextHop)  throws SouthboundException;
 	
 	
 }

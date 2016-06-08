@@ -1,7 +1,6 @@
 package no.mil.fnse.core.model;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
@@ -18,6 +17,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.mil.fnse.core.model.networkElement.BgpConfig;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.model.values.PeerStatus;
@@ -36,9 +36,9 @@ public class Peer implements Serializable{
 	@JsonIgnore
 	private int id;
 
-	private InetAddress localInterfaceIp;
+	private String localInterfaceIp;
 	
-	private InetAddress remoteInterfaceIp;
+	private String remoteInterfaceIp;
 	
 	@JsonIgnore
 	private Timestamp deadTime;
@@ -55,6 +55,8 @@ public class Peer implements Serializable{
 	@JsonIgnore
 	private Router router;
 	
+	private BgpConfig bgpPeer;
+	
 	public Peer(){
 		
 	}
@@ -62,35 +64,38 @@ public class Peer implements Serializable{
 	 // -------------------------------------------------------------------------
     // Equals and hashcode
     // -------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((localInterfaceIp == null) ? 0 : localInterfaceIp.hashCode());
+		result = prime * result + ((remoteInterfaceIp == null) ? 0 : remoteInterfaceIp.hashCode());
+		return result;
+	}
 
-    @Override
-    public int hashCode()
-    {
-        return localInterfaceIp.hashCode();
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Peer other = (Peer) obj;
+		if (localInterfaceIp == null) {
+			if (other.localInterfaceIp != null)
+				return false;
+		} else if (!localInterfaceIp.equals(other.localInterfaceIp))
+			return false;
+		if (remoteInterfaceIp == null) {
+			if (other.remoteInterfaceIp != null)
+				return false;
+		} else if (!remoteInterfaceIp.equals(other.remoteInterfaceIp))
+			return false;
+		return true;
+	}
 
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
 
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof Peer) )
-        {
-            return false;
-        }
-
-        final Peer other = (Peer) o;
-
-        return (localInterfaceIp+""+remoteInterfaceIp).equals( other.getLocalInterfaceIp() +"" + other.getRemoteInterfaceIp() );
-    }
     
 	// -------------------------------------------------------------------------
     // Setters and getters
@@ -98,33 +103,34 @@ public class Peer implements Serializable{
 
     @Id
 	@GeneratedValue
-	@Column(name = "PEER_ID", unique = true, nullable = false)
+	@Column( unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
 
+	
 	public void setId(int id) {
 		this.id = id;
 	}
 
 
-	@Column(name = "PEER_LOCAL_IP", nullable = false)
-	public InetAddress getLocalInterfaceIp() {
+	@Column(name = "localip", nullable = false)
+	public String getLocalInterfaceIp() {
 		return localInterfaceIp;
 	}
-	public void setLocalInterfaceIp(InetAddress localInterfaceAddress) {
+	public void setLocalInterfaceIp(String localInterfaceAddress) {
 		this.localInterfaceIp = localInterfaceAddress;
 	}
 	
-	@Column(name = "PEER_REMOTE_IP", nullable = false)
-	public InetAddress getRemoteInterfaceIp() {
+	@Column(name = "remoteip", nullable = false)
+	public String getRemoteInterfaceIp() {
 		return remoteInterfaceIp;
 	}
-	public void setRemoteInterfaceIp(InetAddress remoteInterfaceIp) {
+	public void setRemoteInterfaceIp(String remoteInterfaceIp) {
 		this.remoteInterfaceIp = remoteInterfaceIp;
 	}
 	
-	@Column(name = "PEER_DEAD_TIME")
+	@Column
 	public Timestamp getDeadTime() {
 		return deadTime;
 	}
@@ -132,7 +138,7 @@ public class Peer implements Serializable{
 		this.deadTime = timestamp;
 	}
 	
-	@Column(name = "PEER_STATUS")
+	@Column
 	public PeerStatus getStatus() {
 		return status;
 	}
@@ -140,8 +146,8 @@ public class Peer implements Serializable{
 		this.status = status;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CONTROLLER_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(nullable = false)
 	public SDNController getController() {
 		return controller;
 	}
@@ -149,8 +155,8 @@ public class Peer implements Serializable{
 		this.controller = controller;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "NETWORKINTERFACE_ID")
+	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn
 	public NetworkInterface getTunnelInterface() {
 		return tunnelInterface;
 	}
@@ -159,14 +165,24 @@ public class Peer implements Serializable{
 		this.tunnelInterface = greTunnel;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "ROUTER_ID")
+	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn
 	public Router getRouter() {
 		return router;
 	}
 
 	public void setRouter(Router router) {
 		this.router = router;
+	}
+
+	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn
+	public BgpConfig getBgpPeer() {
+		return bgpPeer;
+	}
+
+	public void setBgpPeer(BgpConfig bgpPeer) {
+		this.bgpPeer = bgpPeer;
 	}
 	
 	

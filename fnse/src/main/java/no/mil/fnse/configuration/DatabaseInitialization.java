@@ -38,6 +38,8 @@ public class DatabaseInitialization {
 
 		setRoutersAsNational(systemConfiguration.getNationalRouters());
 
+		connectToNetworkElements();
+	
 		fetchConfigurationFromNetworkElement();
 
 		System.out.println("DATABASE IS READY");
@@ -58,23 +60,31 @@ public class DatabaseInitialization {
 		}
 
 	}
+	
+	private void persistRouter(Router router){
+		logger.info("Persisting router: " + router.getManagementIp());
+		router.setId(defaultreposervice.addRouter(router));
+		
+	}
 
 	private void fetchConfigurationFromNetworkElement() {
 
-		connectToNetworkElements();
 
 		for (Router router : systemConfiguration.getNationalRouters()) {
-			/*
-			 * 0) get from network element and persist Interface config 1) get
-			 * from network element and persist BGP config
-			 */
-			router.setId(defaultreposervice.addRouter(router));
+			persistRouter(router);
+			
 			try {
-				vtyRouterDAO.setRouter(router);
+				System.out.println("Connecting to router: " + router.getManagementIp());
+				
+				if(vtyRouterDAO.getRouter() != router){
+					vtyRouterDAO.setRouter(router);
+				}
 
 				Collection<NetworkInterface> neList = vtyRouterDAO.getNetworkInterfaces();
 
 				for (NetworkInterface ne : neList) {
+					System.out.println("NetworkInterface: " + ne.getInterfaceName());
+					
 					ne.setRouter(router);
 					defaultreposervice.addNetworkInterface(ne);
 				}

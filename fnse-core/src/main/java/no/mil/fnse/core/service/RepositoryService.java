@@ -38,7 +38,7 @@ public interface RepositoryService {
 	 * @param deadTime
 	 * @param status
 	 */
-	void updatePeer(int PeerId, Timestamp deadTime, PeerStatus status, NetworkInterface tunnel);
+	void updatePeer(Peer neighbor);
 
 	
 	public Collection<Peer> getAllDeadPeers(Timestamp currentTime);
@@ -49,7 +49,7 @@ public interface RepositoryService {
 	 * @param remoteIp
 	 * @return
 	 */
-	Peer getPeerByIp(InetAddress localIp, InetAddress remoteIp);
+	Peer getPeerByIp(String localIp, String remoteIp);
 	
 	int addSystemConfiguration(SystemConfiguration config);
 
@@ -64,6 +64,8 @@ public interface RepositoryService {
 	Collection<Router> getAllNationalRouters();
 
 	int addRouter(Router router);
+	
+	int addInterfaceAddress(InterfaceAddress ip);
 
 	/**
 	 * Returns the parent router connecting the remote peer
@@ -112,7 +114,13 @@ public interface RepositoryService {
 	void removeNtpfromGlobalConfiguration(int globalConfigurationId, int ntpConfigId);
 
 	int addNetworkInterface(NetworkInterface ne);
+	
+	 void updateNetworkInterface(NetworkInterface ne);
 
-	void delNetworkInterface(int neId);
+	void delNetworkInterface(NetworkInterface neId);
+
+	void addTunnelToNeighbor(int id, int tunnelId);
+
+	void addBgpConfigToPeer(int peerId, int bgpId);
 
 }

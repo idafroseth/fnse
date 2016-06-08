@@ -75,12 +75,12 @@ public class BgpConfig {
 	}
 
 	// -------------------------------------------------------------------------
-    // Setters and getters
+    // Collectionters and getters
     // -------------------------------------------------------------------------
 
     @Id
 	@GeneratedValue
-	@Column(name = "BGPCONFIG_ID", unique = true, nullable = false)
+	@Column(unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -89,7 +89,7 @@ public class BgpConfig {
 		this.id = id;
 	}
 	
-	@Column(name="BGPCONFIG_ROUTER_ID", nullable=false)
+	@Column(nullable=false)
 	public String getRouterId() {
 		return routerId;
 	}
@@ -99,7 +99,7 @@ public class BgpConfig {
 	}
 
 	@OneToMany
-	@JoinColumn(name ="parent")
+	@JoinColumn
 	public Collection<BgpConfig> getNeighbors() {
 		return neighbors;
 	}
@@ -108,7 +108,7 @@ public class BgpConfig {
 		this.neighbors = neighbors;
 	}
 
-	@Column(name="BGPCONFIG_ASN")
+	@Column
 	public String getAsn() {
 		return asn;
 	}
@@ -135,7 +135,7 @@ public class BgpConfig {
 		this.addressFamiliIpv6 = addressFamiliIpv6;
 	}
 
-	@Column(name="BGPCONFIG_EBGP_HOP")
+	@Column(name="ebgphop")
 	public Integer getEbgpHop() {
 		return ebgpHop;
 	}
@@ -144,7 +144,7 @@ public class BgpConfig {
 		this.ebgpHop = ebgpHop;
 	}
 	
-	@Column(name="BGP_NATIONAL_FLAG")
+	@Column
 	public boolean isNational() {
 		return national;
 	}

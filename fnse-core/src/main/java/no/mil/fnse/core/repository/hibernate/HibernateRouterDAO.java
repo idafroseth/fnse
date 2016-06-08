@@ -8,15 +8,14 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.networkElement.Router;
 import no.mil.fnse.core.repository.RouterDAO;
 
-@Component("hibernateRouterDAO")
+@Repository("hibernateRouterDAO")
 public class HibernateRouterDAO implements RouterDAO {
-	static Logger logger = Logger.getLogger(HibernatePeerDAO.class);
+	static Logger logger = Logger.getLogger(HibernateRouterDAO.class);
 	
 	@Autowired
 	public SessionFactory sessionFactory;

@@ -2,18 +2,16 @@ package no.mil.fnse.core.repository.hibernate;
 
 import java.util.Collection;
 
-import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.SystemConfiguration;
 import no.mil.fnse.core.repository.SystemConfigurationDAO;
 
-@Transactional
-@Component("hibernateSystemConfigurationDAO")
+@Repository("hibernateSystemConfigurationDAO")
 public class hibernateSystemConfigurationDAO implements SystemConfigurationDAO {
 
 	static Logger logger = Logger.getLogger(hibernateSystemConfigurationDAO.class);
@@ -29,7 +27,6 @@ public class hibernateSystemConfigurationDAO implements SystemConfigurationDAO {
 		this.sessionFactory = session;
 	}
 
-	@Transactional
 	public int saveSystemConfiguration(SystemConfiguration config) {
 		try {
 			int id = (Integer) sessionFactory.getCurrentSession().save(config);
@@ -40,7 +37,7 @@ public class hibernateSystemConfigurationDAO implements SystemConfigurationDAO {
 		}
 	}
 
-	@Transactional
+	
 	public SystemConfiguration getSystemConfiguration(int id) {
 		try {
 			return (SystemConfiguration) sessionFactory.getCurrentSession().get(SystemConfiguration.class, id);
@@ -60,7 +57,6 @@ public class hibernateSystemConfigurationDAO implements SystemConfigurationDAO {
 		}
 	}
 
-	@Transactional
 	public void delSystemConfiguration(SystemConfiguration config) {
 		try {
 			sessionFactory.getCurrentSession().delete(config);

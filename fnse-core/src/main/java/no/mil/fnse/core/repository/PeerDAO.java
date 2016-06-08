@@ -29,7 +29,7 @@ public interface PeerDAO {
 	 * @param ip
 	 * @return the Peer or null if it does not exists
 	 */
-	Peer getPeerByIp(InetAddress local, InetAddress remote);
+	Peer getPeerByIp(String local, String remote);
 	
 	/**
 	 * Returns all the Peers in the database
@@ -42,14 +42,14 @@ public interface PeerDAO {
 	 * @param localIp
 	 * @return the collection of peers or null if it does not exists
 	 */
-	Collection<Peer> getAllPeersWithLocalIp(InetAddress localIp);
+	Collection<Peer> getAllPeersWithLocalIp(String localIp);
 	
 	/**
 	 * Returns a list of all the peers connected a specific remote neighbor. 
 	 * @param remoteIp
 	 * @return the collection of peers or null if it does not exists
 	 */
-	Collection<Peer> getAllPeersWithRemoteIp(InetAddress remoteIp);
+	Collection<Peer> getAllPeersWithRemoteIp(String remoteIp);
 	
 	/**
 	 * Returns a list of all the peers controlled by a specific controller 

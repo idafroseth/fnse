@@ -49,7 +49,7 @@ public class GlobalConfiguration {
     // -------------------------------------------------------------------------
     @Id
 	@GeneratedValue
-	@Column(name = "GLOBALCONFIG_ID", unique = true, nullable = false)
+	@Column(unique = true, nullable = false)
 	public int getId() {
 		return id;
 	}
@@ -58,7 +58,7 @@ public class GlobalConfiguration {
 		this.id = id;
 	}
 	
-	@Column(name = "NAME", unique=true, nullable=false)
+	@Column( unique=true, nullable=false)
 	public String getName(){
 		return this.name;
 	}
@@ -68,7 +68,7 @@ public class GlobalConfiguration {
 	}
 	
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    @JoinColumn(name = "BGPCONFIG_ID")
+    @JoinColumn
 	public BgpConfig getBgpConfig() {
 		return bgpConfig;
 	}
@@ -79,7 +79,7 @@ public class GlobalConfiguration {
 	}
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "NTPCONFIG_ID")
+    @JoinColumn
 	public NtpConfig getNtpConfig() {
 		return ntpConfig;
 	}
@@ -90,7 +90,7 @@ public class GlobalConfiguration {
 	}
 
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JoinColumn(name = "MSDPCONFIG_ID")
+    @JoinColumn
 	public MsdpConfig getMsdpConfig() {
 		return msdpConfig;
 	}

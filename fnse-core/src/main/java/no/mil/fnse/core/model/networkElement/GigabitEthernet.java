@@ -15,7 +15,7 @@ public class GigabitEthernet extends NetworkInterface{
 	}
 
 	// -------------------------------------------------------------------------
-    // Setters and getters
+    // Collectionters and getters
     // -------------------------------------------------------------------------
 	
 	public Collection<SubInterface> getSubinterfaces() {

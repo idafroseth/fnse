@@ -1,24 +1,23 @@
 package no.mil.fnse.core.repository.hibernate;
 
-import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.Collection;
 
-import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.Peer;
 import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.repository.PeerDAO;
 
-@Transactional
-@Component("hibernatePeerDAO")
+@Repository("hibernatePeerDAO")
 public class HibernatePeerDAO implements PeerDAO{
 	
 	static Logger logger = Logger.getLogger(HibernatePeerDAO.class);
@@ -35,7 +34,7 @@ public class HibernatePeerDAO implements PeerDAO{
 	
 	public int savePeer(Peer peer) {
 		try{
-			if(getPeerByIp(peer.getRemoteInterfaceIp(),peer.getLocalInterfaceIp())==null){
+			if(getPeerByIp(peer.getLocalInterfaceIp(),peer.getRemoteInterfaceIp())==null){
 				int id = (Integer) sessionFactory.getCurrentSession().save(peer);
 				logger.info("New peer added: peer(" + peer.getLocalInterfaceIp()+", " + peer.getRemoteInterfaceIp()+")");
 				return id;
@@ -57,12 +56,14 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 
-	public Peer getPeerByIp(InetAddress local, InetAddress remote) {
+	public Peer getPeerByIp(String local, String remote) {
 		try {
-			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
-			criteria.add(Restrictions.eq("remoteInterfaceIp", remote));
-			criteria.add(Restrictions.eq("localInterfaceIp", local));
-			return (Peer) criteria.uniqueResult();
+			String hqlController = "SELECT p from Peer p "+"where p.localInterfaceIp = :localIp " + "and p.remoteInterfaceIp = :remoteIp ";
+			Query queryControllers = sessionFactory.getCurrentSession().createQuery(hqlController);
+			queryControllers.setString("localIp", local);
+			queryControllers.setString("remoteIp", remote);
+			return (Peer) queryControllers.uniqueResult();
+
 		} catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
 			return null;
@@ -79,7 +80,8 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 
-	public Collection<Peer> getAllPeersWithLocalIp(InetAddress localIp) {
+	@Override
+	public Collection<Peer> getAllPeersWithLocalIp(String localIp) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
 			criteria.add(Restrictions.eq("localInterfaceIp", localIp));
@@ -90,7 +92,8 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 
-	public Collection<Peer> getAllPeersWithRemoteIp(InetAddress remoteIp) {
+	@Override
+	public Collection<Peer> getAllPeersWithRemoteIp(String remoteIp) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
 			criteria.add(Restrictions.eq("remoteInterfaceIp", remoteIp));
@@ -101,6 +104,7 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 
+	@Override
 	public Collection<Peer> getAllPeersWithSDNController(SDNController controller) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
@@ -112,6 +116,7 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 
+	@Override
 	public void delPeer(Peer peer) {
 		try {
 			if (peer == null) {
@@ -123,25 +128,17 @@ public class HibernatePeerDAO implements PeerDAO{
 		}
 	}
 	
+	@Override
 	public void updatePeer(Peer peer) {
 		try{
-			Peer peerToChange = getPeerByIp(peer.getLocalInterfaceIp(), peer.getRemoteInterfaceIp());
-			if(peer.getDeadTime() != null){
-				peerToChange.setDeadTime(peer.getDeadTime());
-			}   
-			if(peer.getStatus()!= null){
-				peerToChange.setStatus(peer.getStatus());
-			}
-			if(peer.getTunnelInterface()!= null){
-				peerToChange.setTunnelInterface(peer.getTunnelInterface());
-			}
-			sessionFactory.getCurrentSession().update(peerToChange);
+			sessionFactory.getCurrentSession().update(peer);
 		}catch (RuntimeException re) {
 			logger.error("Attached failed" + re);
 
 		}
 	}
 	
+	@Override
 	public Collection<Peer> getAllDeadPeers(Timestamp time) {
 		try {
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Peer.class);
