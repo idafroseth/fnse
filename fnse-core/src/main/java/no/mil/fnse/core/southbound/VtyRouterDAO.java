@@ -35,7 +35,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 		return router;
 	}
 
-	public void setRouter(Router router) {
+	public synchronized void setRouter(Router router) {
 		this.router = router;
 	}
 
@@ -65,7 +65,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public BgpConfig getBgpConfig() throws SouthboundException {
+	public synchronized BgpConfig getBgpConfig() throws SouthboundException {
 		isConnected();
 		BgpConfig bgpConfig = new BgpConfig();
 		String response = router.getVty().send("show run | sec router bgp ");
@@ -79,7 +79,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public InetAddress getIpMrouteSource(String multicastGroup, String remotePeer) throws SouthboundException {
+	public synchronized InetAddress getIpMrouteSource(String multicastGroup, String remotePeer) throws SouthboundException {
 		isConnected();
 
 		logger.debug("show ip mroute " + remotePeer + " " + multicastGroup + " | include Incoming interface");
@@ -87,8 +87,11 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 				.send("show ip mroute " + remotePeer + " " + multicastGroup + " | include Incoming interface");
 
 		String ifName = stringMatcher.findFirstWordWithPattern("Ethernet", response);
-
-		return getInterfaceIp(ifName).getIp();
+		InterfaceAddress adress = getInterfaceIp(ifName);
+		if(adress == null){
+			return null;
+		}
+		return adress.getIp();
 	}
 
 	/**
@@ -98,7 +101,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	 * @param interfaceName
 	 * @return
 	 */
-	private InterfaceAddress getInterfaceIp(String interfaceName) throws SouthboundException {
+	private synchronized InterfaceAddress getInterfaceIp(String interfaceName) throws SouthboundException {
 		isConnected();
 		try {
 			String result = router.getVty().send("show run interface " + interfaceName + " | include ip address");
@@ -129,7 +132,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	 * @param interfaceName
 	 * @return
 	 */
-	public InetAddress getSecondaryInterfaceIp(String interfaceName) throws SouthboundException {
+	public synchronized InetAddress getSecondaryInterfaceIp(String interfaceName) throws SouthboundException {
 		isConnected();
 		try {
 			return InetAddress.getByName(stringMatcher.findFirstWordWithPattern("\\.",
@@ -143,13 +146,13 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public List<BgpConfig> getBGPNeighbors() {
+	public synchronized List<BgpConfig> getBGPNeighbors() {
 
 		return null;
 	}
 
 	@Override
-	public HashSet<NetworkInterface> getNetworkInterfaces() throws SouthboundException {
+	public synchronized HashSet<NetworkInterface> getNetworkInterfaces() throws SouthboundException {
 		isConnected();
 		HashSet<NetworkInterface> networkIf = new HashSet<NetworkInterface>();
 		logger.debug("The router VTY is connected ? " + router.getVty());
@@ -170,7 +173,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 
 	}
 
-	public void configureStaticRoute(InetAddress ipNetwork, String netmask, String nextHop) throws SouthboundException {
+	public synchronized void configureStaticRoute(InetAddress ipNetwork, String netmask, String nextHop) throws SouthboundException {
 		isConnected();
 		router.getVty().send("configure terminal");
 
@@ -181,7 +184,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 
 	}
 
-	public void configureBgpPeer(String localAs, String updateSource, BgpConfig bgp) throws SouthboundException {
+	public synchronized void configureBgpPeer(String localAs, String updateSource, BgpConfig bgp) throws SouthboundException {
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("router bgp " + localAs);
@@ -195,7 +198,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 		router.getVty().send("end");
 	}
 
-	public void removeBgpPeer(String localAs, BgpConfig bgp) throws SouthboundException {
+	public synchronized void removeBgpPeer(String localAs, BgpConfig bgp) throws SouthboundException {
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("router bgp " + localAs);
@@ -203,28 +206,23 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 		router.getVty().send("end");
 	}
 
-	public void configureNtpPeer(NtpConfig ntp) throws SouthboundException {
+	public synchronized void configureNtpPeer(NtpConfig ntp) throws SouthboundException {
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("ntp peer " + ntp.getNtpAddress() + " version 4");
 		router.getVty().send("end");
 	}
 
-	public void removeNtpPeer(NtpConfig ntp) throws SouthboundException{
+	public synchronized void removeNtpPeer(NtpConfig ntp) throws SouthboundException{
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("no ntp peer " + ntp.getNtpAddress() + " version 4");
 		router.getVty().send("end");
 	}
 
-	public void configureTunnel(Peer peer) throws SouthboundException{
+	public synchronized void configureTunnel(Peer peer) throws SouthboundException{
 		isConnected();
-		System.out.println("Peer: " + peer);
-		System.out.println("Peer tunnel: " + peer.getTunnelInterface());
-		System.out.println("tunnel name: " + peer.getTunnelInterface().getInterfaceName());
-
 		router.getVty().send("configure terminal");
-		System.out.println("interface " + peer.getTunnelInterface().getInterfaceName());
 		router.getVty().send("interface " + peer.getTunnelInterface().getInterfaceName());
 		if (peer.getTunnelInterface().getInterfaceAddress() != null) {
 			router.getVty().send("ip address " + peer.getTunnelInterface().getInterfaceAddress().toString());
@@ -235,21 +233,21 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 		router.getVty().send("end");
 	}
 
-	public void removeTunnel(String interfaceName) throws SouthboundException{
+	public synchronized void removeTunnel(String interfaceName) throws SouthboundException{
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("no interface " + interfaceName);
 		router.getVty().send("end");
 	}
 
-	public void configureMsdpPeer(MsdpConfig config, String loopbackinterface) throws SouthboundException{
+	public synchronized void configureMsdpPeer(MsdpConfig config, String loopbackinterface) throws SouthboundException{
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("ip msdp peer " + config.getPeerAddress() + " connect-source " + loopbackinterface);
 		router.getVty().send("end");
 	}
 
-	public void removeMsdpPeer(MsdpConfig config) throws SouthboundException{
+	public synchronized void removeMsdpPeer(MsdpConfig config) throws SouthboundException{
 		isConnected();
 		router.getVty().send("configure terminal");
 		router.getVty().send("no ip msdp peer " + config.getPeerAddress());
@@ -257,7 +255,7 @@ public class VtyRouterDAO implements RouterSouthboundDAO {
 	}
 
 	@Override
-	public void removeStaticRoute(InetAddress ipNetwork, String netmask, String nextHop) throws SouthboundException {
+	public synchronized void removeStaticRoute(InetAddress ipNetwork, String netmask, String nextHop) throws SouthboundException {
 		isConnected();
 		router.getVty().send("configure terminal");
 		logger.debug(router.getVty()

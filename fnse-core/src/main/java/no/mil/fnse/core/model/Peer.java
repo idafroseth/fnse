@@ -51,9 +51,9 @@ public class Peer implements Serializable{
 	
 	@JsonProperty("gre_tunnel")
 	private NetworkInterface tunnelInterface;
-
-	@JsonIgnore
-	private Router router;
+//
+//	@JsonIgnore
+//	private Router router;
 	
 	private BgpConfig bgpPeer;
 	
@@ -165,17 +165,17 @@ public class Peer implements Serializable{
 		this.tunnelInterface = greTunnel;
 	}
 
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn
-	public Router getRouter() {
-		return router;
-	}
+//	@OneToOne(fetch = FetchType.EAGER)
+//	@JoinColumn
+//	public Router getRouter() {
+//		return router;
+//	}
+//
+//	public void setRouter(Router router) {
+//		this.router = router;
+//	}
 
-	public void setRouter(Router router) {
-		this.router = router;
-	}
-
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn
 	public BgpConfig getBgpPeer() {
 		return bgpPeer;

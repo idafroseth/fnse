@@ -108,7 +108,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 			DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
 			try {
 				clientSocket.receive(msgPacket);
-				logger.debug("Message is recived! " + msgPacket.getData().toString());
+				logger.info("Message is recived! " + msgPacket.getData().toString());
 
 				String msg = new String(buf, 0, buf.length);
 
@@ -153,14 +153,6 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 	private void persistPeer(Peer neighbor) {
 		defaultreposervice.addSdnController(neighbor.getController());
 		neighbor.setStatus(PeerStatus.DISCOVERED);
-		try {
-			neighbor.setRouter(defaultreposervice.getRouterByLocalIp(InetAddress.getByName(neighbor.getLocalInterfaceIp())));
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			logger.error("Could not find a router attached to the peer: ");
-			e.printStackTrace();
-		
-		}
 		neighbor.setId(defaultreposervice.addPeer(neighbor));
 		if (neighbor.getId() == 0) {
 			logger.error("DiscoveryServiceImpl.discoverdNeighbor Trying to add the correct router but it is null ");
@@ -212,7 +204,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 	private String findLocalIp(String remoteIp) {
 		for (Router router : systemConfiguration.getNationalRouters()) {
 			logger.debug("Trying to fetch the local ip");
-			if(vtyRouterDAO.getRouter()!= router){
+			if(vtyRouterDAO.getRouter() != router || vtyRouterDAO.getRouter() == null){
 				vtyRouterDAO.setRouter(router);
 			}
 			String localIp;

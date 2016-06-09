@@ -22,6 +22,7 @@ import no.mil.fnse.configuration.SystemConfiguration;
 import no.mil.fnse.core.model.DnsConfig;
 import no.mil.fnse.core.model.NtpConfig;
 import no.mil.fnse.core.model.Peer;
+import no.mil.fnse.core.model.SDNController;
 import no.mil.fnse.core.model.SipConfig;
 import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.model.networkElement.InterfaceAddress;
@@ -115,18 +116,9 @@ public class DefaultAutconfService implements AutoconfigurationService {
 		try {
 			logger.info("Trying to get the peer by ip " + localIp + " and " + remoteIp);
 			Peer neighbor = defaultreposervice.getPeerByIp(localIp, remoteIp);
-			Router router;
-			NetworkInterface tunnel;
-			if (neighbor == null) {
-				System.out.println(
-						"havent discovered this peer yet?!! We can basically send the hello message in this message as well...");
-				router = defaultreposervice.getRouterByLocalIp(InetAddress.getByName(localIp));
-				if (router == null) {
-					return local;
-				}
-				tunnel = null;
-			} else {
-				router = neighbor.getRouter();
+			Router router = defaultreposervice.getRouterByLocalIp(InetAddress.getByName(localIp));
+			NetworkInterface tunnel = null;
+			if (neighbor != null) {
 				tunnel = neighbor.getTunnelInterface();
 			}
 
@@ -194,15 +186,24 @@ public class DefaultAutconfService implements AutoconfigurationService {
 		while (true) {
 			while (DiscoveryServiceImpl.configurationQueue.isEmpty()) {
 				try {
-					Thread.sleep(5 * 1000);
+					Thread.sleep(2*1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 
 			Peer neighbor = DiscoveryServiceImpl.configurationQueue.removeFirst();
+			Router router;
+			try {
+				router = defaultreposervice.getRouterByLocalIp(InetAddress.getByName(neighbor.getLocalInterfaceIp()));
+			} catch (UnknownHostException e1) {
+				logger.error("The recieved localIP is not valid!! ");
+				DiscoveryServiceImpl.configurationQueue.add(neighbor);
+				continue;
+			}
+			
 			if (vtyRouterDAO.getRouter() == null) {
-				vtyRouterDAO.setRouter(neighbor.getRouter());
+				vtyRouterDAO.setRouter(router);
 			}
 
 			if (neighbor.getTunnelInterface() == null) {
@@ -212,39 +213,23 @@ public class DefaultAutconfService implements AutoconfigurationService {
 			neighbor = defaultreposervice.getPeerByIp(neighbor.getLocalInterfaceIp(), neighbor.getRemoteInterfaceIp());
 			configureRouteToRemoteController(neighbor);
 
-			LocalConfiguration remoteLocalConfig;
-			try {
-				String url = "http://" + neighbor.getController().getIpAddress().trim()
-						+ ":8080/api/configuration/local/" + neighbor.getRemoteInterfaceIp() + "/"
-						+ neighbor.getLocalInterfaceIp() + "/";
-
-				logger.info("connecting to " + url);
-				remoteLocalConfig = restTemplate.getForObject(url, LocalConfiguration.class);
-				logger.info("REMOTE REST RESPONSE " + remoteLocalConfig.getBgp() + remoteLocalConfig.getTunnel());
-			} catch (ResourceAccessException e) {
-				logger.error("****No route to neighbor, addding it back into the queue");
-				DiscoveryServiceImpl.configurationQueue.add(neighbor);
+			LocalConfiguration remoteLocalConfig = fetchRemoteConfig(neighbor);
+			
+			if(remoteLocalConfig == null){
+				DiscoveryServiceImpl.configurationQueue.add(neighbor); 
 				continue;
 			}
-			// If the remote node is not ready the tunnel or bgp interface is
-			// not set . Then add the node back to the queue and try again later
-			if (remoteLocalConfig.getTunnel() == null || remoteLocalConfig.getBgp() == null) {
-				DiscoveryServiceImpl.configurationQueue.add(neighbor);
-				logger.info("Remote peer is not ready, adding the peer back to the queue");
-				continue;
-			}
-
+	
+			//IF we are a slave node use the provided IP from remoteConfig
 			if (neighbor.getController().getEntityId() > systemConfiguration.getNationalController().getEntityId()) {
 				try {
-					logger.info("We are a slave node and have to configure the ip: "
+					logger.info("We are a slave node and have to configure the IP: "
 							+ neighbor.getController().getEntityId());
 					neighbor.getTunnelInterface()
 							.setInterfaceAddress(getSlaveIp(remoteLocalConfig.getTunnel().getInterfaceAddress()));
-
 					defaultreposervice.updateNetworkInterface(neighbor.getTunnelInterface());
 				} catch (UnknownHostException e) {
 					logger.error("Attached failed when trying to convert ip " + e);
-					e.printStackTrace();
 				}
 			}
 
@@ -255,19 +240,20 @@ public class DefaultAutconfService implements AutoconfigurationService {
 			// VI MÅ OGSÅ HENTE ALL CONFIG FRA REMOTE PEER
 			/// CONFIGURE THE PEER
 
-			logger.info("###Trying to configure the tunnel!");
+			
 			try {
+				logger.info("Configuring tunnel");
 				vtyRouterDAO.configureTunnel(neighbor);
-				vtyRouterDAO.configureBgpPeer(neighbor.getRouter().getGlobalConfiguration().getBgpConfig().getAsn(),
+				logger.info("Configuring BGP");
+				vtyRouterDAO.configureBgpPeer( defaultreposervice.getRouterByLocalIp(InetAddress.getByName(neighbor.getLocalInterfaceIp())).getGlobalConfiguration().getBgpConfig().getAsn(),
 						"loopback" + systemConfiguration.getNationalController().getEntityId(),
 						remoteLocalConfig.getBgp());
-
+				logger.info("Configuring static route to bgp peer");
 				vtyRouterDAO.configureStaticRoute(
 						InetAddress.getByName(remoteLocalConfig.getBgp().getRouterId().trim()), "255.255.255.255",
 						neighbor.getTunnelInterface().getInterfaceName());
 			} catch (UnknownHostException | SouthboundException e) {
 				logger.error("Attached failed: " + e);
-				e.printStackTrace();
 			}
 			neighbor.setStatus(PeerStatus.CONFIGURED);
 
@@ -276,6 +262,23 @@ public class DefaultAutconfService implements AutoconfigurationService {
 
 	}
 
+	private LocalConfiguration fetchRemoteConfig(Peer neighbor){
+		try {
+			String url = "http://" + neighbor.getController().getIpAddress().trim()
+					+ ":8080/api/configuration/local/" + neighbor.getRemoteInterfaceIp() + "/"
+					+ neighbor.getLocalInterfaceIp() + "/";
+
+			logger.info("Fetching configuration from remote host: " + url);
+			LocalConfiguration remoteLocalConfig= restTemplate.getForObject(url, LocalConfiguration.class);
+			if (remoteLocalConfig.getTunnel() == null || remoteLocalConfig.getBgp() == null) {
+				return null;
+			}
+			return remoteLocalConfig;
+		} catch (ResourceAccessException | NullPointerException e ) {
+			return null;
+		}
+	}
+	
 	private boolean configureRouteToRemoteController(Peer neighbor) {
 		try {
 			vtyRouterDAO.configureStaticRoute(InetAddress.getByName(neighbor.getController().getIpAddress()),
@@ -310,18 +313,21 @@ public class DefaultAutconfService implements AutoconfigurationService {
 			// "GET REQUEST TO PEER"
 			tunnel = grePoolSlave.removeFirst();
 		}
-		System.out.println("The neighbor ID IS:" + neighbor.getId());
+//		System.out.println("The neighbor ID IS:" + neighbor.getId());
 		tunnel.setDescription("Tunnel_to:" + neighbor.getController().getEntityId());
-		tunnel.setRouter(neighbor.getRouter());
+	
+		try {
+			tunnel.setRouter(defaultreposervice.getRouterByLocalIp(InetAddress.getByName(neighbor.getLocalInterfaceIp())));
+		} catch (UnknownHostException e) {
+			logger.error("attached failed: " + e);
+			e.printStackTrace();
+		}
 		int tunnelId = defaultreposervice.addNetworkInterface(tunnel);
 		defaultreposervice.addTunnelToNeighbor(neighbor.getId(), tunnelId);
 		logger.info("Added tunnel to neighbor : " + neighbor.getId() + tunnel.getId());
 
 	}
 
-	private void configureGlobal() {
-
-	}
 
 	/*
 	 * 1) This method has to delete all configuration of the peer. 2) Put the
@@ -332,7 +338,7 @@ public class DefaultAutconfService implements AutoconfigurationService {
 	@Override
 	public void removeDeadPeers() {
 
-		System.out.println("******* Autoconf Starting to listen for deadPeers!!");
+		logger.info("******* Autoconf Starting to listen for deadPeers!!");
 
 		while (true) {
 			logger.debug("***********STARTING TO CHECK FOR DEAD PEERS!!!");
@@ -340,19 +346,16 @@ public class DefaultAutconfService implements AutoconfigurationService {
 			Collection<Peer> deadPeers = defaultreposervice.getAllDeadPeers(new Timestamp(System.currentTimeMillis()));
 			for (Peer deadNeighbor : deadPeers) {
 				try {
+					Router router = defaultreposervice.getRouterByLocalIp(InetAddress.getByName(deadNeighbor.getLocalInterfaceIp()));
 					if (vtyRouterDAO.getRouter() == null) {
-						vtyRouterDAO.setRouter(deadNeighbor.getRouter());
-						if (deadNeighbor.getRouter() == null) {
-							logger.error("The dead neighbor has not been assigned a ROUTER!!");
-							continue;
-						}
+						vtyRouterDAO.setRouter(router);
 					}
 
 					logger.info("Removing tunnel");
 					vtyRouterDAO.removeTunnel(deadNeighbor.getTunnelInterface().getInterfaceName());
 					logger.info("Removing bgp config");
 					vtyRouterDAO.removeBgpPeer(
-							deadNeighbor.getRouter().getGlobalConfiguration().getBgpConfig().getAsn(),
+							router.getGlobalConfiguration().getBgpConfig().getAsn(),
 							deadNeighbor.getBgpPeer());
 
 					logger.info("Removing static route to bgp peer");
@@ -365,7 +368,15 @@ public class DefaultAutconfService implements AutoconfigurationService {
 				} catch (UnknownHostException | SouthboundException e) {
 					logger.error("Error occured when config to dead peer: " + e);
 				}
+				System.out.println("Deleting bgp config ");
+//				defaultreposervice.delBgpConfiguration(deadNeighbor.getBgpPeer().getId());
+				System.out.println("Deleting peer  ");
+				int ctrlId = deadNeighbor.getController().getId();
 				defaultreposervice.delPeer(deadNeighbor.getId());
+				SDNController sdnCtrl = defaultreposervice.getSdnController(ctrlId);
+				if(sdnCtrl.getPeers().isEmpty()){
+					defaultreposervice.delSDNController(sdnCtrl);
+				}
 			}
 			try {
 				Thread.sleep(5 * 1000);

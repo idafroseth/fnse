@@ -78,7 +78,7 @@ public class GlobalConfiguration {
 		this.bgpConfig = bgpConfig;
 	}
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn
 	public NtpConfig getNtpConfig() {
 		return ntpConfig;
@@ -89,7 +89,7 @@ public class GlobalConfiguration {
 		this.ntpConfig = ntpConfig;
 	}
 
-    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn
 	public MsdpConfig getMsdpConfig() {
 		return msdpConfig;

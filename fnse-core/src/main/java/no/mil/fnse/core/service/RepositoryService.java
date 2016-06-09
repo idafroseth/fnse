@@ -118,6 +118,8 @@ public interface RepositoryService {
 	 void updateNetworkInterface(NetworkInterface ne);
 
 	void delNetworkInterface(NetworkInterface neId);
+	
+	void delSDNController(SDNController ctrl);
 
 	void addTunnelToNeighbor(int id, int tunnelId);
 

@@ -156,7 +156,7 @@ public class Router {
 		return this.password;
 	}
 	
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToOne(cascade=CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinColumn
 	public GlobalConfiguration getGlobalConfiguration() {
 		return globalConfiguration;
@@ -166,7 +166,7 @@ public class Router {
 		this.globalConfiguration = globalConfiguration;
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "router")
+	@OneToMany(cascade=CascadeType.DETACH, fetch = FetchType.EAGER, mappedBy = "router")
 	public Collection<NetworkInterface> getNetworkInterfaces() {
 		return networkInterfaces;
 	}

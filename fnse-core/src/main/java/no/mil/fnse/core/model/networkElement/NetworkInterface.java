@@ -132,7 +132,7 @@ public class NetworkInterface {
 		this.description = description;
 	}
 	
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(nullable = false)
 	public Router getRouter() {
 		return router;

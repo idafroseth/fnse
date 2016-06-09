@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -16,7 +15,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import no.mil.fnse.core.model.Peer;
@@ -27,7 +25,6 @@ import no.mil.fnse.core.model.networkElement.GlobalConfiguration;
 import no.mil.fnse.core.model.networkElement.InterfaceAddress;
 import no.mil.fnse.core.model.networkElement.NetworkInterface;
 import no.mil.fnse.core.model.networkElement.Router;
-import no.mil.fnse.core.model.values.PeerStatus;
 import no.mil.fnse.core.repository.BgpConfigDAO;
 import no.mil.fnse.core.repository.GlobalConfigurationDAO;
 import no.mil.fnse.core.repository.InterfaceAddressDAO;
@@ -73,7 +70,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Transactional
 	@Override
 	public int addPeer(Peer peer) {
-		if (peer.getLocalInterfaceIp() == null || peer.getRemoteInterfaceIp() == null || peer.getRouter() == null) {
+		if (peer.getLocalInterfaceIp() == null || peer.getRemoteInterfaceIp() == null ){//|| peer.getRouter() == null) {
 			logger.error("Trying to save peer put the local or remote ip is not set or the router is null...");
 			return 0;
 		}
@@ -129,42 +126,49 @@ public class RepositoryServiceImpl implements RepositoryService {
 		/// WE must remember to remove all links from SDNcontroller first!
 		//First we have to find the SDN controller in charge and remove the peer from the controller
 		//if the sdn controller only has one peer also delete this peer
-		String hqlController = "SELECT s from SDNController s " + "join s.peers c " + "where c.id = :peerId";
-		Query queryControllers = sessionFactory.getCurrentSession().createQuery(hqlController);
-		queryControllers.setInteger("peerId", peerId);
 		
-	
-		ArrayList<SDNController> controllersOwningPeer = (ArrayList<SDNController>) queryControllers.list();
-		for (SDNController ctrl : controllersOwningPeer) {
-			removePeerFromSdnController(peerId, ctrl.getId());
-			removeSDNController(ctrl);
-		}
+		System.out.println("Deleting the tunnel interface");
+		delNetworkInterface(getPeer(peerId).getTunnelInterface());
 		
-		Peer peerInDB = getPeer(peerId);
-		removeNetworkInterfaceFromRouter(peerInDB.getRouter().getId(), peerInDB.getTunnelInterface().getId());
-		delNetworkInterface(peerInDB.getTunnelInterface());
-		peerInDB.setRouter(null);
-		sessionFactory.getCurrentSession().update(peerInDB);
-		BgpConfig bgpConf = peerInDB.getBgpPeer();
+//		System.out.println("Removing the router from peer");
+//		removeRouterFromPeer(peerId, getPeer(peerId).getRouter().getId());
+		
+		System.out.println("Removing the BGP config");
+		BgpConfig bgpConf = getPeer(peerId).getBgpPeer();
 		removeBgpConfigFromPeer(peerId,bgpConf.getId() );
-		delBgpConfiguration(bgpConf);
-		sessionFactory.getCurrentSession().update(peerInDB);
+		delBgpConfiguration(bgpConf.getId());
+		 
+		Peer peerInDb = getPeer(peerId);
+		System.out.println("Removing the peer from the sdn controller");
+		removePeerFromSdnController(peerId,getPeer(peerId).getController().getId());
+//		removeCtrlFromPeer(peerId);
 //		peerInDB.getBgpPeer();
 		//REMOVE TUNNEL INTERFACE AND ADD IT BACK TO THE CACHE
 		//
 		// if(r != null){
 		// removeRemotePeerFromRouter(r.getId(),peerId);
 		// }
-		hibernatePeerDAO.delPeer(hibernatePeerDAO.getPeer(peerId));
+		
+		System.out.println("Trying to delete peer!");
+		hibernatePeerDAO.delPeer(peerInDb);
 	}
 	
+//	@Transactional
+//	public void delBgpConfiguration(BgpConfig bgpConfig) {
+//	
+//		hibernateBgpConfigDAO.delBgpConfig(bgpConfig);
+//	}
 	@Transactional
-	public void delBgpConfiguration(BgpConfig bgpConfig) {
-		hibernateBgpConfigDAO.delBgpConfig(bgpConfig);
+	void removeCtrlFromPeer(int peerId){
+		Session session = sessionFactory.getCurrentSession();
+		Criteria criteria = session.createCriteria(Peer.class);
+		Peer peer = getPeer(peerId);
+		peer.setController(null);
+		session.update(peer);
 	}
-	
 	@Transactional
 	void removeBgpConfigFromPeer(int peerId, int bgpId){
+		System.out.println("Removing the relation between bgp and peer");
 		Session session = sessionFactory.getCurrentSession();
 		Criteria criteria = session.createCriteria(Peer.class);
 		Peer peer = getPeer(peerId);
@@ -176,14 +180,18 @@ public class RepositoryServiceImpl implements RepositoryService {
 		Session session = sessionFactory.getCurrentSession();
 		Criteria criteria = session.createCriteria(Router.class);
 		Router router = getRouter(routerId);
-		ArrayList<NetworkInterface> interfaceList =  (ArrayList<NetworkInterface>) router.getNetworkInterfaces();
-		if(interfaceList == null){
+		if(router == null){
 			return;
+		}
+		
+		Collection<NetworkInterface> interfaceList = router.getNetworkInterfaces();
+
+		if(interfaceList.isEmpty()){
+			interfaceList = new HashSet<NetworkInterface>();
 		}
 		interfaceList.remove(getNetworkInterface(neId));
 		router.setNetworkInterfaces(interfaceList);
 		session.update(router);
-
 		
 	}
 	@Transactional
@@ -191,21 +199,21 @@ public class RepositoryServiceImpl implements RepositoryService {
 		return hibernateRouterDAO.getRouter(id);
 	}
 	
-	@Transactional
-	void removeRouterFromPeer(int router, int peerId){
-		Session session = sessionFactory.getCurrentSession();
-		Criteria criteria = session.createCriteria(Peer.class);
-		Peer peer = getPeer(peerId);
-		if (peer == null) {
-			return;
-		}
-		Router parent = peer.getRouter();
-		if (parent == null) {
-			return;
-		}
-		peer.setRouter(null);
-		session.update(peer);
-	}
+//	@Transactional
+//	void removeRouterFromPeer(int router, int peerId){
+//		Session session = sessionFactory.getCurrentSession();
+//		Criteria criteria = session.createCriteria(Peer.class);
+//		Peer peer = getPeer(peerId);
+//		if (peer == null) {
+//			return;
+//		}
+//		Router parent = peer.getRouter();
+//		if (parent == null) {
+//			return;
+//		}
+//		peer.setRouter(null);
+//		session.update(peer);
+//	}
 	
 	@Transactional
 	void removeNetworkInterfaceFromPeer(int peerId, int neId){
@@ -302,29 +310,35 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Transactional
 	public void removePeerFromSdnController(int peerId, int ctrlId) {
 		Session session = sessionFactory.getCurrentSession();
-		Criteria criteria = session.createCriteria(Peer.class);
+		Criteria criteria = session.createCriteria(SDNController.class);
 		SDNController sdnCtrl = getSdnController(ctrlId);
 		if (sdnCtrl == null) {
 			return;
 		}
 		Collection<Peer> sdnCtrlPeers = sdnCtrl.getPeers();
 		if (sdnCtrlPeers.isEmpty()) {
-			sdnCtrlPeers = new HashSet<Peer>();
-			removeSDNController(sdnCtrl);
+//			delSDNController(sdnCtrl);
 			return;
 		}
 		sdnCtrlPeers.remove(hibernatePeerDAO.getPeer(peerId));
-		if(sdnCtrlPeers.isEmpty()){
-			removeSDNController(sdnCtrl);
-			return;
-		}
+//		if(sdnCtrlPeers.isEmpty()){
+//			delSDNController(sdnCtrl);
+//			return;
+//		}
 		sdnCtrl.setPeers(sdnCtrlPeers);
 		session.update(sdnCtrl);
-
 	}
 	
 	@Transactional
-	private void removeSDNController(SDNController ctrl){
+	@Override
+	public void delSDNController(SDNController ctrl){
+		String hql = "SELECT s from Peer s " + "join s.controller d " + "where d.id = :ctrlId";
+		Query query = sessionFactory.getCurrentSession().createQuery(hql);
+		query.setInteger("ctrlId", ctrl.getId());
+		Peer parent = (Peer) query.uniqueResult();
+		if(parent != null){
+			removeCtrlFromPeer(parent.getId());
+		}
 		hibernateSDNControllerDAO.delSDNController(ctrl);
 	}
 
@@ -477,7 +491,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Override
 	@Transactional
 	public void delGlobalConfiguration(int globalconfId) {
-		System.out.println("Trying to find routers responsible for globalconfig");
+//		System.out.println("Trying to find routers responsible for globalconfig");
 		String hql = "SELECT s from Router s " + "join s.globalConfiguration d " + "where d.id = :globalconfId";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
 		query.setInteger("globalconfId", globalconfId);
@@ -493,6 +507,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Transactional
 	public int addBgpConfiguration(BgpConfig bgpConfig) {
 		// TODO Auto-generated method stub
+
 		return hibernateBgpConfigDAO.saveBgpConfig(bgpConfig);
 	}
 
@@ -502,6 +517,42 @@ public class RepositoryServiceImpl implements RepositoryService {
 		// TODO Auto-generated method stub
 		// First remove all link from global config to this one before we delete
 		// it!!
+		String hql = "SELECT s from BgpConfig s " + "join s.neighbors d " + "where d.id = :bgpConfigId";
+		Query query = sessionFactory.getCurrentSession().createQuery(hql);
+		query.setInteger("bgpConfigId", bgpConfigId);
+		BgpConfig parentConfig = (BgpConfig) query.uniqueResult();
+		if(parentConfig != null){
+			removeBgpConfigFromParent(parentConfig.getId(), bgpConfigId);
+		}
+		
+		String hql2 = "SELECT s from Peer s " + "join s.bgpPeer d " + "where d.id = :bgpConfigId";
+		Query query2 = sessionFactory.getCurrentSession().createQuery(hql2);
+		query2.setInteger("bgpConfigId", bgpConfigId);
+		Peer parentPeer = (Peer) query2.uniqueResult();
+		
+		System.out.println("PARENT PEER IS: " +parentPeer);
+		if(parentConfig != null){
+			System.out.println("Trying to remove the relation between the peer and bgp config");
+			removeBgpConfigFromPeer(parentConfig.getId(), bgpConfigId);
+		}
+		hibernateBgpConfigDAO.delBgpConfig(getBgpConfiguration(bgpConfigId));
+	}
+	
+	@Transactional
+	public void removeBgpConfigFromParent(int pId, int id){
+		BgpConfig parent = getBgpConfiguration(pId);
+		if(parent == null){
+			return;
+		}
+		
+		Set<BgpConfig> bgpPeers = (Set<BgpConfig>) parent.getNeighbors();
+		if(bgpPeers.isEmpty()){
+			return;
+		}
+		else{
+			bgpPeers.remove(getBgpConfiguration(id));
+			sessionFactory.getCurrentSession().update(parent);
+		}
 	}
 
 	@Override
@@ -527,7 +578,6 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Override
 	@Transactional
 	public void removeBgpfromGlobalConfiguration(int globalConfigurationId, int bgpConfigId) {
-		// TODO Auto-generated method stub
 
 	}
 	
@@ -572,17 +622,17 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Transactional
 	public int addNetworkInterface(NetworkInterface ne) {
 		InterfaceAddress ia = ne.getInterfaceAddress();
-		if (ia != null) {
-			System.out.println("The interface address is set " + ia);
-//			InterfaceAddress iaInDB = hibernateInterfaceAddressDAO.getInterfaceAddressByIp(ne.getInterfaceAddress().getIp());
-			
-//			if (iaInDB == null) {
-//				System.out.println("The interface address is not in DB" + ia);
-//				ne.getInterfaceAddress()
-//						.setId(hibernateInterfaceAddressDAO.saveInterfaceAddress(ne.getInterfaceAddress()));
-//				System.out.println("InterfaceAddress is saved getting id: " + ne.getInterfaceAddress().getId());
-//			}
-		}
+//		if (ia != null) {
+//			System.out.println("The interface address is set " + ia);
+////			InterfaceAddress iaInDB = hibernateInterfaceAddressDAO.getInterfaceAddressByIp(ne.getInterfaceAddress().getIp());
+//			
+////			if (iaInDB == null) {
+////				System.out.println("The interface address is not in DB" + ia);
+////				ne.getInterfaceAddress()
+////						.setId(hibernateInterfaceAddressDAO.saveInterfaceAddress(ne.getInterfaceAddress()));
+////				System.out.println("InterfaceAddress is saved getting id: " + ne.getInterfaceAddress().getId());
+////			}
+//		}
 //		sessionFactory.getCurrentSession().persist(ne);
 		return hibernateNetworkInterface.saveNetworkInterface(ne);
 	}
@@ -596,14 +646,49 @@ public class RepositoryServiceImpl implements RepositoryService {
 	@Override
 	@Transactional
 	public void delNetworkInterface(NetworkInterface ne) {
-		removeNetworkInterfaceFromRouter(ne.getRouter().getId(), ne.getId());
-		delInterfaceAddress(ne.getInterfaceAddress());
+
+		InterfaceAddress ia = ne.getInterfaceAddress();
+		if(ia != null){
+			delInterfaceAddress(ia);
+		}
+		String hql = "SELECT s from Router s " + "join s.networkInterfaces d " + "where d.id = :neId";
+		Query query = sessionFactory.getCurrentSession().createQuery(hql);
+		query.setInteger("neId", ne.getId());
+		Router parentRouter = (Router) query.uniqueResult();
+		if(parentRouter != null){
+			removeNetworkInterfaceFromRouter(parentRouter.getId(), ne.getId());
+		}
+		String hql2 = "SELECT s from Peer s " + "join s.tunnelInterface d " + "where d.id = :neId";
+		Query query2 = sessionFactory.getCurrentSession().createQuery(hql2);
+		query2.setInteger("neId", ne.getId());
+		Peer parentPeer = (Peer) query2.uniqueResult();
+		if(parentPeer != null){
+			removeNetworkInterfaceFromPeer(parentPeer.getId(), ne.getId());
+		}
 		hibernateNetworkInterface.delNetworkInterface(ne);
 
 	}
 	
 	@Transactional
+	void removeInterfaceAddressFromInterface(int neId, int iaId){
+	
+		System.out.println("Removing the relation between ia and ne");
+		Session session = sessionFactory.getCurrentSession();
+		Criteria criteria = session.createCriteria(NetworkInterface.class);
+		NetworkInterface ne = getNetworkInterface(neId);
+		ne.setInterfaceAddress(null);
+		session.update(ne);	
+	}
+
+	@Transactional
 	void delInterfaceAddress(InterfaceAddress adr){
+		String hql = "SELECT s from NetworkInterface s " + "join s.interfaceAddress d " + "where d.id = :adrId";
+		Query query = sessionFactory.getCurrentSession().createQuery(hql);
+		query.setInteger("adrId", adr.getId());
+		NetworkInterface parentNe = (NetworkInterface) query.uniqueResult();
+		if(parentNe != null){
+			removeInterfaceAddressFromInterface(parentNe.getId(),adr.getId());
+		}
 		hibernateInterfaceAddressDAO.delInterfaceAddress(adr);
 	}
 
