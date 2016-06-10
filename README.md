@@ -5,7 +5,7 @@ It supports Cisco network elements for now. It is develop using Java 1.7, Spring
 
 ##Installation
 There is two projects in this repo the _fnse-core_ and _fnse_. The _fnse_ is dependendt 
-of _fnse-core_ so you should build and run the _fnse-core_ before _fnse_. The projectes are built with maven so you can run Â
+of _fnse-core_ so you should build and run the _fnse-core_ before _fnse_. The projectes are built with maven so you can run
 `mvn build install`. 
 
 ##Run the code
@@ -18,7 +18,7 @@ The code is dependent of a POSTGRES database named fnse with username zelus and 
 
 The application is dependent upon a configuration file having the format:
 
-Â´ÂÂ§````json
+§````json
 {
 	"nationalController":{
 		"ip":"47.0.0.2",
@@ -33,7 +33,7 @@ The application is dependent upon a configuration file having the format:
 		}
 	]
 }
-Â´ÂÂ```
+```
 The configuration file should be located at the same location as the .jar file at runtime. 
 
 
