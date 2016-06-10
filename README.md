@@ -18,7 +18,7 @@ The code is dependent of a POSTGRES database named fnse with username zelus and 
 
 The application is dependent upon a configuration file having the format:
 
-§````json
+```json
 {
 	"nationalController":{
 		"ip":"47.0.0.2",
